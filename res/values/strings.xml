@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Vocabulary</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="search">search</string>
+    <string name="random">Random</string>
+    <string name="list">Lists</string>
+    <string name="exam">Exam</string>
+    <string name="dictionary">"Dictionary"</string>
+    <string name="add">"Add to list"</string>
+    <string name="enter_name">Enter name</string>
+    <string name="already_know">"Already know"</string>
+    <string name="finish">"Finish"</string>
+    <string name="next_exam">"Next exam"</string>
+    <string name="next">"Next"</string>
+    <string name="prev">"Prev"</string>
+    <string name="app_id">325301461010125</string>
+    <string name="add_note">Add note</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_to_list">Add to list</string>
+    <string name="add_new">Add new</string>
+
+</resources>
