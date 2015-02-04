@@ -24,8 +24,8 @@ public class Question {
 	public Question(DBHelper dbh, Idiom idiom) {
 		this.dbh = dbh;
 		this.idiom = idiom;
-		word = idiom.getName();
-		correctChoice = idiom.getDefinition();
+		word = idiom.getDefinition();
+		correctChoice = idiom.getName();
 		generateChoices();
 		answered = false;
 	}

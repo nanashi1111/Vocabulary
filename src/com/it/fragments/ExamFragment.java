@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.it.models.Exam;
 import com.it.models.Question;
 import com.it.utils.FacebookUtils;
+import com.it.utils.LogUtils;
 import com.it.utils.PreferenceUtils;
 import com.it.vocabulary.BaseActivity;
 import com.it.vocabulary.HomeActivity;
@@ -105,10 +106,22 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 		tvWord.setText(question.getWord());
 		for (int i = 0; i < btChoices.length; i++) {
 			btChoices[i].setText(question.getChoices()[i]);
+			if (question.getWord().lastIndexOf(question.getChoices()[i]) > 0) {
+				String word = tvWord.getText().toString();
+				word = word.replace(question.getChoices()[i], "***");
+				tvWord.setText(word);
+
+			}
 		}
 		tvQuestionCount.setText((exam.getCurrentPosition() + 1) + "/"
 				+ Exam.NUMBER_QUESTION);
 		tvPoint.setText("Points:" + exam.getPoint());
+		// log info
+		LogUtils.logInfo("Text get = " + tvWord.getText().toString());
+		LogUtils.logInfo("Question = " + question.getWord());
+		LogUtils.logInfo("True answer = " + question.getCorrectChoice());
+		LogUtils.logInfo("Position = "
+				+ question.getWord().lastIndexOf(question.getCorrectChoice()));
 	}
 
 	private void answerQuestion(int questionPosition, int choice) {
@@ -131,7 +144,7 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 						.getCorrectChoicePosition()]
 						.setBackgroundColor(Color.GREEN);
 			}
-			//check complete
+			// check complete
 			checkComplete();
 		}
 		// if answered
@@ -142,55 +155,74 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 	}
 
 	private void resetButtons(int questionPosition) {
-		//if not answerd yet, white all
+		// if not answerd yet, white all
 		if (!exam.getListQuestion().get(questionPosition).isAnswered()) {
 			for (int i = 0; i < btChoices.length; i++) {
 				btChoices[i].setBackgroundColor(Color.WHITE);
 			}
 		}
-		//if answered, hilight selected answer
-		else{
-			int selectedPosition = exam.getListQuestion().get(questionPosition).getSelectedChoicePosition();
-			int correctPosition = exam.getListQuestion().get(questionPosition).getCorrectChoicePosition();
-			for(int i=0;i<btChoices.length;i++){
-				if(i == selectedPosition){
+		// if answered, hilight selected answer
+		else {
+			int selectedPosition = exam.getListQuestion().get(questionPosition)
+					.getSelectedChoicePosition();
+			int correctPosition = exam.getListQuestion().get(questionPosition)
+					.getCorrectChoicePosition();
+			for (int i = 0; i < btChoices.length; i++) {
+				if (i == selectedPosition) {
 					btChoices[i].setBackgroundColor(Color.RED);
 				}
-				if(i == correctPosition){
+				if (i == correctPosition) {
 					btChoices[i].setBackgroundColor(Color.GREEN);
 				}
-				if((i!=selectedPosition)&&(i!=correctPosition)){
+				if ((i != selectedPosition) && (i != correctPosition)) {
 					btChoices[i].setBackgroundColor(Color.WHITE);
 				}
 			}
 		}
 	}
-	
-	private void checkComplete(){
-		//if complete show result dialog
-		if(exam.isCompleted()){
-			new AlertDialog.Builder(getActivity()).setMessage("Result: "+exam.getPoint()+" points. Do you want to share?").setTitle("Result")
-			.setNegativeButton("No", new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					
-				}
-			}).setPositiveButton("Share!!!", new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					SimpleFacebook mSimpleFacebook = ((HomeActivity)getActivity()).getSimpleFacebookInstance();
-					
-					//check login
-					if(!PreferenceUtils.isLoggedInFacebook(getActivity())){
-						FacebookUtils.login(getActivity(), mSimpleFacebook, FacebookUtils.ACTION_POST_SCORE_AFTER_LOGIN, exam.getPoint()+"");
-					}
-					//share
-					else
-					FacebookUtils.shareScore(mSimpleFacebook, exam.getPoint());
-				}
-			}).setCancelable(true).show();
+
+	private void checkComplete() {
+		// if complete show result dialog
+		if (exam.isCompleted()) {
+			new AlertDialog.Builder(getActivity())
+					.setMessage(
+							"Result: " + exam.getPoint()
+									+ " points. Do you want to share?")
+					.setTitle("Result")
+					.setNegativeButton("No",
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+
+								}
+							})
+					.setPositiveButton("Share!!!",
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									SimpleFacebook mSimpleFacebook = ((HomeActivity) getActivity())
+											.getSimpleFacebookInstance();
+
+									// check login
+									if (!PreferenceUtils
+											.isLoggedInFacebook(getActivity())) {
+										FacebookUtils
+												.login(getActivity(),
+														mSimpleFacebook,
+														FacebookUtils.ACTION_POST_SCORE_AFTER_LOGIN,
+														exam.getPoint() + "");
+									}
+									// share
+									else
+										FacebookUtils.shareScore(
+												mSimpleFacebook,
+												exam.getPoint());
+								}
+							}).setCancelable(true).show();
 		}
 	}
 
@@ -221,7 +253,7 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 			break;
 		case R.id.choice_1:
 			answerQuestion(exam.getCurrentPosition(), Question.CHOICE_1);
-			
+
 			break;
 		case R.id.choice_2:
 			answerQuestion(exam.getCurrentPosition(), Question.CHOICE_2);

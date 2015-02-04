@@ -253,8 +253,8 @@ public class DBHelper extends SQLiteOpenHelper {
 		String[] choices = new String[3];
 		// Cursor cursor = getReadableDatabase().rawQuery(queryChoice, null);
 		Cursor cursor = getReadableDatabase().query("Idiom",
-				new String[] { "definition" }, "definition != ?",
-				new String[] { idiom.getDefinition() }, null, null,
+				new String[] { "name" }, "name != ?",
+				new String[] { idiom.getName() }, null, null,
 				"random() limit 3");
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
