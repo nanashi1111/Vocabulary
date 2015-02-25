@@ -19,6 +19,8 @@ import android.widget.ListView;
 
 import com.it.adapters.ListAdapter;
 import com.it.adapters.ListIdiomAdapter;
+import com.it.database.DBHelper;
+import com.it.models.ICollection;
 import com.it.models.Idiom;
 import com.it.models.List;
 import com.it.vocabulary.BaseActivity;
@@ -27,9 +29,16 @@ import com.it.vocabulary.R;
 public class ListFragments extends BaseFragment implements OnItemClickListener {
 
 	private static ListFragments INSTANCE = new ListFragments();
+
+	/* widgets */
 	private View rootView;
 	private ListView lvLists;
+
+	/* list idiom of current collection */
 	private ArrayList<Idiom> listIdiom;
+
+	/* database helper */
+	DBHelper dbh;
 
 	public static ListFragments getInstance() {
 		return INSTANCE;
@@ -40,6 +49,7 @@ public class ListFragments extends BaseFragment implements OnItemClickListener {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		rootView = inflater.inflate(R.layout.fragment_lists, null);
+		dbh = ((BaseActivity) getActivity()).getDBHelper();
 		setupView(rootView);
 		return rootView;
 	}
@@ -54,21 +64,34 @@ public class ListFragments extends BaseFragment implements OnItemClickListener {
 		lvLists.setAdapter(adapter);
 	}
 
+	/*
+	 * get data to prepare collection type detect user request a topic or list
+	 * of word
+	 */
 	private void getData() {
 		Bundle bundle = getArguments();
-		String collectionType = bundle.getString("collection_type");
-		if (collectionType.equals("topic")) {
+		int collectionType = bundle.getInt("collection_type");
+		if (collectionType == ICollection.TYPE_TOPIC) {
 			int topicId = bundle.getInt("collection_id");
-			listIdiom = ((BaseActivity) getActivity()).getDBHelper()
-					.getListIdiomOfTopic(topicId);
+			if (topicId == 2) {
+				listIdiom = ((BaseActivity) getActivity()).getDBHelper()
+						.getListIdiomOfTopic(topicId, false);
+			} else {
+				listIdiom = ((BaseActivity) getActivity()).getDBHelper()
+						.getListIdiomOfTopic(topicId, true);
+			}
 		}
-		if (collectionType.equals("list")) {
+		if (collectionType == ICollection.TYPE_LIST) {
 			int listId = bundle.getInt("collection_id");
 			listIdiom = ((BaseActivity) getActivity()).getDBHelper()
 					.getListIdiomOfList(listId);
 		}
+		if(collectionType == ICollection.TYPE_EVERYDAY_IDIOM){
+			listIdiom = ((BaseActivity) getActivity()).getDBHelper().getListIdiomOfEveryDayIdiom();
+		}
 	}
 
+	/* show dialog with definition of a idiom */
 	private void showDialogDefinition(final Idiom idiom) {
 		new AlertDialog.Builder(getActivity())
 				.setMessage(idiom.getDefinition())
@@ -95,6 +118,7 @@ public class ListFragments extends BaseFragment implements OnItemClickListener {
 						}).setCancelable(true).show();
 	}
 
+	/* show dialog add idiom to a list */
 	private void showDialogAddToList(final Idiom idiom) {
 		final Dialog dialog = new Dialog(getActivity());
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -178,6 +202,7 @@ public class ListFragments extends BaseFragment implements OnItemClickListener {
 				});
 	}
 
+	/* add a idiom to a list */
 	private void addIdiomToList(Idiom idiom, List list) {
 		((BaseActivity) getActivity()).getDBHelper()
 				.addIdiomToList(idiom, list);

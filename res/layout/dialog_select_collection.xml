@@ -20,6 +20,7 @@
             android:src="@drawable/cancel_trans" />
 
         <TextView
+            android:id="@+id/dialog_select_collection_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"

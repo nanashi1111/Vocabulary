@@ -83,4 +83,36 @@ public class PreferenceUtils {
 		editor.putBoolean("downloaded_data", downloaded);
 		editor.commit();
 	}
+
+	// check sent data
+	public static boolean isSentData(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(
+				Constant.PREFERENCE_RUNTIME, Context.MODE_PRIVATE);
+		boolean sent = pref.getBoolean("sent_data", false);
+		return sent;
+	}
+
+	// set downloaded data
+	public static void setSentUserData(Context context, boolean sentData) {
+		SharedPreferences pref = context.getSharedPreferences(
+				Constant.PREFERENCE_RUNTIME, Context.MODE_PRIVATE);
+		Editor editor = pref.edit();
+		editor.putBoolean("sent_data", sentData);
+		editor.commit();
+	}
+
+	public static int getRunTimeCount(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(
+				Constant.PREFERENCE_RUNTIME, Context.MODE_PRIVATE);
+		int runtimeCount = pref.getInt("runtime_count", 0);
+		return runtimeCount;
+	}
+
+	public static void setRuntimeCount(Context context, int runtimeCount) {
+		SharedPreferences pref = context.getSharedPreferences(
+				Constant.PREFERENCE_RUNTIME, Context.MODE_PRIVATE);
+		Editor editor = pref.edit();
+		editor.putInt("runtime_count", runtimeCount);
+		editor.commit();
+	}
 }

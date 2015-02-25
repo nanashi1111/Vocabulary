@@ -1,6 +1,7 @@
 package com.it.fragments;
 
 import java.util.ArrayList;
+
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -18,11 +19,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.it.adapters.SideMenuAdapter;
+import com.it.models.Exam;
+import com.it.utils.FacebookUtils;
+import com.it.utils.LogUtils;
+import com.it.utils.PreferenceUtils;
 import com.it.vocabulary.HomeActivity;
 import com.it.vocabulary.R;
+import com.sromku.simple.fb.SimpleFacebook;
 
 public class NavigationDrawerFragment extends Fragment {
 
@@ -68,8 +76,9 @@ public class NavigationDrawerFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		mDrawerListView = (ListView) inflater.inflate(
-				R.layout.fragment_navigation_drawer, container, false);
+		View rootView = inflater.inflate(
+				R.layout.fragment_navigation_drawer, null);
+		mDrawerListView = (ListView) rootView.findViewById(R.id.side_menu);
 		mDrawerListView
 				.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 					@Override
@@ -78,9 +87,32 @@ public class NavigationDrawerFragment extends Fragment {
 						selectItem(position);
 					}
 				});
+		Button btShare = (Button)rootView.findViewById(R.id.share_app);
+		btShare.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				shareApp();
+			}
+		});
 		prepareListData();
 
-		return mDrawerListView;
+		return rootView;
+	}
+	
+	private void shareApp(){
+		SimpleFacebook mSimpleFacebook = ((HomeActivity) getActivity())
+				.getSimpleFacebookInstance();
+
+		// check login
+		if (!PreferenceUtils.isLoggedInFacebook(getActivity())) {
+			FacebookUtils.login(getActivity(), mSimpleFacebook,
+					FacebookUtils.ACTION_SHARE_APP_AFTER_LOGIN,null);
+		}
+		// share
+		else {
+			FacebookUtils.shareApp(mSimpleFacebook, getActivity());
+		}
 	}
 
 	public boolean isDrawerOpen() {
@@ -179,22 +211,24 @@ public class NavigationDrawerFragment extends Fragment {
 	}
 
 	private void selectItem(int position) {
-		// mCurrentSelectedPosition = position;
-		// if (mDrawerListView != null) {
-		// mDrawerListView.setItemChecked(position, true);
-		// }
 		switch (position) {
 		case 0:
 			// show dialog select topic
 			if (!FIRST_TIME) {
+				LogUtils.logInfo("FIRST TIME = false");
 				((HomeActivity) getActivity()).showDialogSelectCollection(1);
 			} else {
+				LogUtils.logInfo("FIRST TIME = true");
 				FIRST_TIME = false;
 			}
+			//((HomeActivity) getActivity()).showDialogSelectCollection(1);
 			break;
 		case 1:
 			// show dialog select list
 			((HomeActivity) getActivity()).showDialogSelectCollection(2);
+			break;
+		case 2:
+			((HomeActivity) getActivity()).showEverydayIdiom();	
 			break;
 		}
 		if (mDrawerLayout != null) {

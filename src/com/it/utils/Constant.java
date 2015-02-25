@@ -6,7 +6,7 @@ public class Constant {
 	// Share preference facebook
 	public static String PREFERENCE_FACEBOOK = "facebook";
 	// GCM project Id
-	public static String GCM_PROJECT_ID = "672898967569";
+	public static String GCM_PROJECT_ID = "278954022357";
 	// facebook id
 	public static final String FACEBOOK_APPID = "325301461010125";
 	// Share preference runtime

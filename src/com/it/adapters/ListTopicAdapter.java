@@ -1,11 +1,8 @@
 package com.it.adapters;
 
 import java.util.ArrayList;
-import java.util.List;
-
 import com.it.models.Topic;
 import com.it.vocabulary.R;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +35,7 @@ public class ListTopicAdapter extends ArrayAdapter<Topic> {
 		tvTopicName.setText(listTopic.get(position).getName());
 		ImageView ivSelection = (ImageView)v.findViewById(R.id.selection);
 		if(position == selection){
-			ivSelection.setImageResource(R.drawable.done_trans);
+			ivSelection.setImageResource(R.drawable.choose);
 		}
 		return v;
 	}

@@ -11,36 +11,40 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20sp"
         android:layout_marginRight="20sp"
-        android:background="@drawable/bg_dash_blue_grey"
+        android:layout_marginTop="15sp"
+        android:background="@drawable/bg_exam"
         android:gravity="center"
         android:orientation="vertical" >
 
         <TextView
+            android:id="@+id/point"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="15sp"
-            android:background="@drawable/bg_dash_blue_white"
-            android:text="Points: 10/15"
+            android:background="@drawable/bg_result"
+            android:padding="10sp"
             android:textSize="20sp" />
 
         <TextView
+            android:id="@+id/percent"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="15sp"
             android:layout_marginLeft="15sp"
             android:layout_marginRight="15sp"
-            android:background="@drawable/bg_dash_blue_white"
-            android:text="Percent: 67%"
+            android:background="@drawable/bg_result"
+            android:padding="10sp"
             android:textSize="20sp" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_marginTop="20sp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="20sp"
         android:layout_marginLeft="20sp"
         android:layout_marginRight="20sp"
-        android:background="@drawable/bg_dash_blue_grey"
+        android:layout_marginTop="20sp"
+        android:background="@drawable/bg_exam"
         android:gravity="center"
         android:orientation="vertical" >
 
@@ -60,21 +64,38 @@
             android:layout_marginBottom="15sp" >
 
             <Button
-                android:layout_width="wrap_content"
+                android:id="@+id/finish"
+                android:layout_width="80sp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="15sp"
-                android:background="@color/dark_blue"
+                android:background="@drawable/lava_quiz_neutral"
                 android:text="@string/finish" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:id="@+id/next_exam"
+                android:layout_width="100sp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="15sp"
-                android:background="@color/dark_blue"
+                android:background="@drawable/lava_quiz_neutral"
                 android:text="@string/next_exam" />
         </RelativeLayout>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/share_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15sp"
+        android:layout_marginRight="15sp"
+        android:background="@drawable/bg_share"
+        android:drawablePadding="10sp"
+        android:drawableStart="@drawable/ic_fb"
+        android:gravity="left|center_vertical"
+        android:padding="10sp"
+        android:text="@string/share_score"
+        android:textColor="@color/white"
+        android:textSize="19sp" />
 
 </LinearLayout>

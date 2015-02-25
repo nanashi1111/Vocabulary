@@ -2,6 +2,7 @@ package com.it.database;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -12,14 +13,16 @@ import com.it.models.Exam;
 import com.it.models.Idiom;
 import com.it.models.List;
 import com.it.models.Topic;
+import com.it.utils.DateUtils;
 
 public class DBHelper extends SQLiteOpenHelper {
 
 	private static final String DB_NAME = "VocabularyDB";
-	private static final int DB_VERSION = 2;
+	private static final int DB_VERSION = 3;
 	private static final String CREATE_TABLE_IDIOM = "create table Idiom(id integer primary key, name text, definition text, sample text, note text, date_create text, topic_id integer, list_id integer);";
 	private static final String CREATE_TABLE_TOPIC = "create table Topic(topic_id integer primary key, name text, description text, idiom_count integer, date_create text);";
 	private static final String CREATE_TABLE_LIST = "create table List(list_id integer primary key autoincrement, name text);";
+	private static final String CREATE_TABLE_EVERY_IDIOM = "create table EveryDayIdiom(ids text, start_date text);";
 
 	public DBHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -30,6 +33,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		db.execSQL(CREATE_TABLE_IDIOM);
 		db.execSQL(CREATE_TABLE_TOPIC);
 		db.execSQL(CREATE_TABLE_LIST);
+		db.execSQL(CREATE_TABLE_EVERY_IDIOM);
 	}
 
 	@Override
@@ -111,7 +115,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	public ArrayList<Idiom> getListIdiomOfTopic(Topic topic) {
 		ArrayList<Idiom> listIdiom = new ArrayList<Idiom>();
 		String query = "select * from Idiom where topic_id = "
-				+ topic.getTopicId();
+				+ topic.getTopicId() + " order by random()";
 		Cursor cursor = getReadableDatabase().rawQuery(query, null);
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -134,9 +138,38 @@ public class DBHelper extends SQLiteOpenHelper {
 		return listIdiom;
 	}
 
-	public ArrayList<Idiom> getListIdiomOfTopic(int topicId) {
+	public Idiom getIdiomById(int id) {
+		String query = "select * from Idiom where id = " + id;
+		Cursor cursor = getReadableDatabase().rawQuery(query, null);
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			Idiom idiom = new Idiom();
+			idiom.setId(cursor.getInt(cursor.getColumnIndex("id")));
+			idiom.setName(cursor.getString(cursor.getColumnIndex("name")));
+			idiom.setDefinition(cursor.getString(cursor
+					.getColumnIndex("definition")));
+			idiom.setSample(cursor.getString(cursor.getColumnIndex("sample")));
+			idiom.setNote(cursor.getString(cursor.getColumnIndex("note")));
+			idiom.setDateCreate(cursor.getString(cursor
+					.getColumnIndex("date_create")));
+			idiom.setTopicId(cursor.getInt(cursor.getColumnIndex("topic_id")));
+			return idiom;
+		} else {
+			return new Idiom();
+		}
+	}
+
+	public ArrayList<Idiom> getListIdiomOfTopic(int topicId,
+			boolean filterAlreadyKnow) {
 		ArrayList<Idiom> listIdiom = new ArrayList<Idiom>();
-		String query = "select * from Idiom where topic_id = " + topicId;
+		String query;
+		if (!filterAlreadyKnow) {
+			query = "select * from Idiom where topic_id = " + topicId
+					+ " order by random()";
+		} else {
+			query = "select * from Idiom where topic_id = " + topicId
+					+ " and list_id <> 2" + " order by random()";
+		}
 		Cursor cursor = getReadableDatabase().rawQuery(query, null);
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -180,7 +213,9 @@ public class DBHelper extends SQLiteOpenHelper {
 	public boolean checkIdiomExist(Idiom idiom) {
 		String query = "select * from Idiom where id = " + idiom.getId();
 		Cursor cursor = getReadableDatabase().rawQuery(query, null);
-		return cursor.getCount() > 0;
+		boolean isIdiomExist = cursor.getCount() > 0;
+		cursor.close();
+		return isIdiomExist;
 	}
 
 	public boolean checkTopicExist(Topic topic) {
@@ -307,6 +342,64 @@ public class DBHelper extends SQLiteOpenHelper {
 			addList(new List("Liked"));
 			addList(new List("Already know"));
 		}
+		if (!checkEveryDayIdiomTableHasData()) {
+			addEveryDayIdiomList();
+		} else {
+			if (getDayEveryIdiom() > 7) {
+				clearTableEveryDay();
+			}
+		}
+	}
+
+	public boolean checkEveryDayIdiomTableHasData() {
+		String query = "select * from EveryDayIdiom";
+		Cursor cursor = getReadableDatabase().rawQuery(query, null);
+		return cursor.getCount() > 0;
+	}
+
+	public void addEveryDayIdiomList() {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put("ids", "");
+		contentValues.put("start_date", DateUtils.getCurrentDate());
+		getWritableDatabase().insert("EveryDayIdiom", null, contentValues);
+	}
+
+	public int getDayEveryIdiom() {
+		String query = "select * from EveryDayIdiom";
+		Cursor cursor = getReadableDatabase().rawQuery(query, null);
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			String date1 = cursor
+					.getString(cursor.getColumnIndex("start_date"));
+			String date2 = DateUtils.getCurrentDate();
+			return DateUtils.getDateDistance(date1, date2);
+		} else {
+			return -1;
+		}
+	}
+
+	public String getIdsEverydayIdiom() {
+		String query = "select * from EveryDayIdiom";
+		Cursor cursor = getReadableDatabase().rawQuery(query, null);
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			String ids = cursor.getString(cursor.getColumnIndex("ids"));
+			return ids;
+		} else {
+			return "";
+		}
+	}
+
+	public void updateIdsEverydayIdiom(String ids) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put("ids", ids);
+		getWritableDatabase()
+				.update("EveryDayIdiom", contentValues, null, null);
+	}
+
+	public void clearTableEveryDay() {
+		String query = "delete from EveryDayIdiom";
+		getWritableDatabase().execSQL(query);
 	}
 
 	public List getListById(int id) {
@@ -384,6 +477,64 @@ public class DBHelper extends SQLiteOpenHelper {
 			} while (cursor.moveToNext());
 		}
 		return listIdiom;
+	}
+
+	@SuppressLint("NewApi")
+	public ArrayList<Idiom> getListIdiomOfEveryDayIdiom() {
+		ArrayList<Idiom> listIdiom = new ArrayList<Idiom>();
+		String ids = getIdsEverydayIdiom();
+		if (ids.isEmpty()) {
+			return listIdiom;
+		} else {
+			String[] id = ids.split(",");
+			for (int i = 0; i < id.length; i++) {
+				Idiom idiom = getIdiomById(Integer.parseInt(id[i]));
+				listIdiom.add(idiom);
+			}
+			return listIdiom;
+		}
+	}
+
+	public boolean checkIdiomInList(Idiom idiom, List list) {
+		String query = "select list_id from Idiom where id = " + idiom.getId();
+		Cursor cursor = getReadableDatabase().rawQuery(query, null);
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			int idiomListId = cursor.getInt(0);
+			return idiomListId == list.getListId();
+		} else {
+			return false;
+		}
+	}
+
+	@SuppressLint("NewApi")
+	public boolean checkIdiomHasNote(Idiom idiom) {
+		if (idiom != null) {
+			String query = "select note from Idiom where id = " + idiom.getId();
+			Cursor cursor = getReadableDatabase().rawQuery(query, null);
+			if (cursor.getCount() > 0) {
+				cursor.moveToFirst();
+				String note = cursor.getString(0);
+				boolean hasNote = ((note == null) || (note.isEmpty()) || (note
+						.equalsIgnoreCase("null"))) ? false : true;
+				return hasNote;
+			} else {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	public String getNoteOfIdiom(Idiom idiom) {
+		String query = "select note from Idiom where id = " + idiom.getId();
+		Cursor cursor = getReadableDatabase().rawQuery(query, null);
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			String note = cursor.getString(0);
+			return note;
+		} else {
+			return "";
+		}
 	}
 
 }

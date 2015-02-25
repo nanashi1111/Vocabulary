@@ -21,5 +21,9 @@
     <string name="cancel">Cancel</string>
     <string name="add_to_list">Add to list</string>
     <string name="add_new">Add new</string>
+    <string name="share_score">Share score</string>
+    <string name="share_app">Share this app</string>
+    <string name="banner_ad_unit_id">ca-app-pub-2928455978605682/5725531453</string>
+    <string name="banner_full">ca-app-pub-2928455978605682/8678997854</string>
 
 </resources>

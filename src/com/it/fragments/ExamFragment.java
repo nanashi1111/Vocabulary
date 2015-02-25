@@ -3,7 +3,6 @@ package com.it.fragments;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,16 +11,13 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import com.it.models.Exam;
+import com.it.models.ICollection;
 import com.it.models.Question;
-import com.it.utils.FacebookUtils;
 import com.it.utils.LogUtils;
-import com.it.utils.PreferenceUtils;
 import com.it.vocabulary.BaseActivity;
 import com.it.vocabulary.HomeActivity;
 import com.it.vocabulary.R;
-import com.sromku.simple.fb.SimpleFacebook;
 
 @SuppressLint("NewApi")
 public class ExamFragment extends BaseFragment implements OnClickListener {
@@ -115,7 +111,7 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 		}
 		tvQuestionCount.setText((exam.getCurrentPosition() + 1) + "/"
 				+ Exam.NUMBER_QUESTION);
-		tvPoint.setText("Points:" + exam.getPoint());
+		tvPoint.setText("Points: " + exam.getPoint());
 		// log info
 		LogUtils.logInfo("Text get = " + tvWord.getText().toString());
 		LogUtils.logInfo("Question = " + question.getWord());
@@ -135,14 +131,17 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 			// true then add 10 points, hilight answer and update point
 			if (exam.getListQuestion().get(questionPosition).isCorrect()) {
 				exam.setPoint(exam.getPoint() + 10);
-				btChoices[choice].setBackgroundColor(Color.GREEN);
-				tvPoint.setText("Points:" + exam.getPoint());
+				btChoices[choice].setBackground(getActivity().getResources()
+						.getDrawable(R.drawable.lava_quiz_green));
+				tvPoint.setText("Points: " + exam.getPoint());
 				// hilight answer
 			} else {
-				btChoices[choice].setBackgroundColor(Color.RED);
+				btChoices[choice].setBackground(getActivity().getResources()
+						.getDrawable(R.drawable.lava_quiz_red));
 				btChoices[exam.getListQuestion().get(questionPosition)
 						.getCorrectChoicePosition()]
-						.setBackgroundColor(Color.GREEN);
+						.setBackground(getActivity().getResources()
+								.getDrawable(R.drawable.lava_quiz_green));
 			}
 			// check complete
 			checkComplete();
@@ -158,7 +157,8 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 		// if not answerd yet, white all
 		if (!exam.getListQuestion().get(questionPosition).isAnswered()) {
 			for (int i = 0; i < btChoices.length; i++) {
-				btChoices[i].setBackgroundColor(Color.WHITE);
+				btChoices[i].setBackground(getActivity().getResources()
+						.getDrawable(R.drawable.choice_selector));
 			}
 		}
 		// if answered, hilight selected answer
@@ -169,13 +169,16 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 					.getCorrectChoicePosition();
 			for (int i = 0; i < btChoices.length; i++) {
 				if (i == selectedPosition) {
-					btChoices[i].setBackgroundColor(Color.RED);
+					btChoices[i].setBackground(getActivity().getResources()
+							.getDrawable(R.drawable.lava_quiz_red));
 				}
 				if (i == correctPosition) {
-					btChoices[i].setBackgroundColor(Color.GREEN);
+					btChoices[i].setBackground(getActivity().getResources()
+							.getDrawable(R.drawable.lava_quiz_green));
 				}
 				if ((i != selectedPosition) && (i != correctPosition)) {
-					btChoices[i].setBackgroundColor(Color.WHITE);
+					btChoices[i].setBackground(getActivity().getResources()
+							.getDrawable(R.drawable.lava_quiz_neutral));
 				}
 			}
 		}
@@ -184,52 +187,149 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 	private void checkComplete() {
 		// if complete show result dialog
 		if (exam.isCompleted()) {
-			new AlertDialog.Builder(getActivity())
-					.setMessage(
-							"Result: " + exam.getPoint()
-									+ " points. Do you want to share?")
-					.setTitle("Result")
-					.setNegativeButton("No",
-							new DialogInterface.OnClickListener() {
-
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which) {
-
-								}
-							})
-					.setPositiveButton("Share!!!",
-							new DialogInterface.OnClickListener() {
-
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which) {
-									SimpleFacebook mSimpleFacebook = ((HomeActivity) getActivity())
-											.getSimpleFacebookInstance();
-
-									// check login
-									if (!PreferenceUtils
-											.isLoggedInFacebook(getActivity())) {
-										FacebookUtils
-												.login(getActivity(),
-														mSimpleFacebook,
-														FacebookUtils.ACTION_POST_SCORE_AFTER_LOGIN,
-														exam.getPoint() + "");
-									}
-									// share
-									else
-										FacebookUtils.shareScore(
-												mSimpleFacebook,
-												exam.getPoint());
-								}
-							}).setCancelable(true).show();
+			// new AlertDialog.Builder(getActivity())
+			// .setMessage(
+			// "Result: " + exam.getPoint()
+			// + " points. Do you want to share?")
+			// .setTitle("Result")
+			// .setNegativeButton("No",
+			// new DialogInterface.OnClickListener() {
+			//
+			// @Override
+			// public void onClick(DialogInterface dialog,
+			// int which) {
+			//
+			// }
+			// })
+			// .setPositiveButton("Share!!!",
+			// new DialogInterface.OnClickListener() {
+			//
+			// @Override
+			// public void onClick(DialogInterface dialog,
+			// int which) {
+			// SimpleFacebook mSimpleFacebook = ((HomeActivity) getActivity())
+			// .getSimpleFacebookInstance();
+			//
+			// // check login
+			// if (!PreferenceUtils
+			// .isLoggedInFacebook(getActivity())) {
+			// FacebookUtils
+			// .login(getActivity(),
+			// mSimpleFacebook,
+			// FacebookUtils.ACTION_POST_SCORE_AFTER_LOGIN,
+			// exam.getPoint() + "");
+			// }
+			// // share
+			// else
+			// FacebookUtils.shareScore(
+			// mSimpleFacebook,
+			// exam.getPoint());
+			// }
+			// }).setCancelable(true).show();
+			Bundle bundle = new Bundle();
+			bundle.putInt("number_question", Exam.NUMBER_QUESTION);
+			bundle.putInt("number_correct", exam.getPoint()
+					/ Exam.POINT_PER_QUESTION);
+			ResultFragment resultFragment = new ResultFragment();
+			resultFragment.setArguments(bundle);
+			((BaseActivity) getActivity()).switchContent(R.id.container,
+					resultFragment, bundle);
+			HomeActivity.setCurrentState(HomeActivity.STATE_RESULT);
 		}
+	}
+
+	public void showDialogCancelExam(final int screenToGo,
+			final boolean randomScreenFocusSearchBar) {
+		new AlertDialog.Builder(getActivity())
+				.setMessage(
+						"You are doing a test, do you want to cancel the test? <Dung ngu phap ko day :v>")
+				.setTitle("Exam")
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+
+					}
+				})
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								switch (screenToGo) {
+
+								/* show random idiom screen */
+								case HomeActivity.STATE_RANDOM:
+									((HomeActivity) getActivity())
+											.setRandomFragment(new RandomIdiomFragment(
+													randomScreenFocusSearchBar));
+									Bundle bundle = new Bundle();
+									bundle.putInt("from_list_fragment",
+											ICollection.TYPE_TOPIC);
+									bundle.putBoolean("random_load", true);
+									// randomFragment.setArguments(bundle);
+									((HomeActivity) getActivity())
+											.switchContent(
+													R.id.container,
+													((HomeActivity) getActivity())
+															.getRandomFragment(),
+													bundle);
+									HomeActivity.currentState = HomeActivity.STATE_RANDOM;
+									((HomeActivity) getActivity())
+											.setBackground();
+									break;
+
+								/* show list screen */
+								case HomeActivity.STATE_LISTS:
+									((HomeActivity) getActivity())
+											.setListFragment(ListFragments
+													.getInstance());
+									// take collection info to show
+									// in listFragment
+									int collectionType = ((HomeActivity) getActivity())
+											.getRandomFragment()
+											.getCurrentCollectionType();
+									Bundle bundleList = new Bundle();
+									bundleList.putInt("collection_type",
+											collectionType);
+									if (collectionType == ICollection.TYPE_TOPIC) {
+										bundleList.putInt("collection_id",
+												((HomeActivity) getActivity())
+														.getRandomFragment()
+														.getCurrentTopicID());
+									} else {
+										bundleList.putInt("collection_id",
+												((HomeActivity) getActivity())
+														.getRandomFragment()
+														.getCurrentListID());
+									}
+									((HomeActivity) getActivity())
+											.switchContent(
+													R.id.container,
+													((HomeActivity) getActivity())
+															.getListFragment(),
+													bundleList);
+
+									HomeActivity.currentState = HomeActivity.STATE_LISTS;
+									((HomeActivity) getActivity())
+											.setBackground();
+									break;
+								}
+							}
+						}).setCancelable(true).show();
 	}
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.next:
+			//check answerd
+			if(!exam.getCurrentQuestion().isAnswered()){
+				((BaseActivity) getActivity())
+				.makeToast("You must answer this question first");
+				return;
+			}
 			// check can next
 			if (exam.getCurrentPosition() == (Exam.NUMBER_QUESTION - 1)) {
 				((BaseActivity) getActivity())

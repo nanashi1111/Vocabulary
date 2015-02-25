@@ -1,10 +1,35 @@
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey"
-    android:choiceMode="singleChoice"
-    android:divider="@android:color/transparent"
-    android:dividerHeight="1dp"
-    tools:context="com.it.vocabulary.NavigationDrawerFragment" />
+    android:orientation="vertical"
+    android:weightSum="10" >
 
+    <ListView
+        android:id="@+id/side_menu"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="9"
+        android:background="@color/grey"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="1dp"
+        tools:context="com.it.vocabulary.NavigationDrawerFragment" />
+
+    <Button
+        android:id="@+id/share_app"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15sp"
+        android:layout_marginRight="15sp"
+        android:background="@drawable/bg_share"
+        android:drawablePadding="10sp"
+        android:drawableStart="@drawable/ic_fb"
+        android:gravity="left|center_vertical"
+        android:padding="10sp"
+        android:text="@string/share_app"
+        android:textColor="@color/white"
+        android:textSize="19sp" />
+
+</LinearLayout>

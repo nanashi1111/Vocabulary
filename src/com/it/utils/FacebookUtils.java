@@ -11,6 +11,7 @@ import android.content.pm.Signature;
 import android.util.Base64;
 import android.widget.Toast;
 
+import com.it.models.Idiom;
 import com.sromku.simple.fb.Permission;
 import com.sromku.simple.fb.SimpleFacebook;
 import com.sromku.simple.fb.entities.Feed;
@@ -23,6 +24,8 @@ import com.sromku.simple.fb.listeners.OnPublishListener;
 public class FacebookUtils {
 
 	public static final int ACTION_POST_SCORE_AFTER_LOGIN = 1;
+	public static final int ACTION_FEED_AFTER_LOGIN = 2;
+	public static final int ACTION_SHARE_APP_AFTER_LOGIN = 3;
 
 	public static void getKeyHash(Context context) {
 		PackageInfo info;
@@ -50,19 +53,24 @@ public class FacebookUtils {
 	// login
 	public static void login(final Context context,
 			final SimpleFacebook simpleFacebookInstance,
-			final int actionWhenLoginDone, final String params) {
+			final int actionWhenLoginDone, final Object params) {
 		LogUtils.logInfo("start login");
 		OnLoginListener onLoginListener = new OnLoginListener() {
 			@Override
 			public void onLogin() {
 				LogUtils.logInfo("Logged in");
 				PreferenceUtils.putLoggedFacebook(context, true);
-				Toast.makeText(context, "Logged facebook", Toast.LENGTH_LONG)
+				Toast.makeText(context, "Logged facebook", Toast.LENGTH_SHORT)
 						.show();
 				if (actionWhenLoginDone == ACTION_POST_SCORE_AFTER_LOGIN) {
 					LogUtils.logInfo("start share");
-					publishFeed(simpleFacebookInstance,
-							Integer.parseInt(params));
+					Integer score = (Integer) params;
+					shareScore(simpleFacebookInstance, score, context);
+				} else if (actionWhenLoginDone == ACTION_FEED_AFTER_LOGIN) {
+					Idiom idiom = (Idiom) params;
+					shareIdiom(simpleFacebookInstance, idiom, context);
+				} else if(actionWhenLoginDone == ACTION_SHARE_APP_AFTER_LOGIN){
+					shareApp(simpleFacebookInstance, context);
 				}
 
 			}
@@ -150,7 +158,7 @@ public class FacebookUtils {
 	}
 
 	public static void publishFeed(SimpleFacebook simpleFacebookInstance,
-			int score) {
+			String msg) {
 		LogUtils.logInfo("start share");
 		OnPublishListener onPublishListener = new OnPublishListener() {
 			@Override
@@ -166,6 +174,81 @@ public class FacebookUtils {
 			@Override
 			public void onThinking() {
 				LogUtils.logInfo("thinking...");
+				
+			}
+
+			@Override
+			public void onException(Throwable throwable) {
+				LogUtils.logInfo("Exception:" + throwable.toString());
+			}
+
+		};
+		Feed feed = new Feed.Builder().setMessage(msg).setName("Vocabulary")
+				.setCaption(msg).setDescription("Vocabulary")
+				.setLink("https://www.facebook.com").build();
+		simpleFacebookInstance.publish(feed, true, onPublishListener);
+	}
+
+	public static void shareIdiom(SimpleFacebook simpleFacebookInstance,
+			Idiom idiom,final Context context) {
+		LogUtils.logInfo("start share");
+		OnPublishListener onPublishListener = new OnPublishListener() {
+			@Override
+			public void onComplete(String postId) {
+				LogUtils.logInfo("share score successfully");
+				Toast.makeText(context, "Share idiom successfully", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onFail(String reason) {
+				LogUtils.logInfo("Error:" + reason);
+				Toast.makeText(context, "Error:" + reason, Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onThinking() {
+				LogUtils.logInfo("thinking...");
+				Toast.makeText(context, "Start sharing", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onException(Throwable throwable) {
+				LogUtils.logInfo("Exception:" + throwable.toString());
+			}
+			
+			
+
+		};
+		Feed feed = new Feed.Builder()
+				.setMessage(idiom.getName() + ": " + idiom.getDefinition())
+				.setName("Vocabulary")
+				.setCaption(idiom.getName() + ": " + idiom.getDefinition())
+				.setDescription(idiom.getName() + ": " + idiom.getDefinition())
+				.setLink("https://play.google.com/store/apps/details?id=com.it.vocabulary")
+				.build();
+		simpleFacebookInstance.publish(feed, onPublishListener);
+	}
+
+	public static void shareScore(SimpleFacebook simpleFacebookInstance,
+			Integer scorePoint,final Context context) {
+		LogUtils.logInfo("start share");
+		OnPublishListener onPublishListener = new OnPublishListener() {
+			@Override
+			public void onComplete(String postId) {
+				LogUtils.logInfo("share score successfully");
+				Toast.makeText(context, "Share score successfully", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onFail(String reason) {
+				LogUtils.logInfo("Error:" + reason);
+				Toast.makeText(context, "Error:" + reason, Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onThinking() {
+				LogUtils.logInfo("thinking...");
+				Toast.makeText(context, "Start sharing", Toast.LENGTH_SHORT).show();
 			}
 
 			@Override
@@ -175,16 +258,51 @@ public class FacebookUtils {
 
 		};
 		Feed feed = new Feed.Builder()
-				.setMessage(
-						"Minh dc tan " + score
-								+ " diem nay, thich vai. hi hi ^^")
-				.setName("Simple Facebook")
-				.setCaption(
-						"Minh dc tan " + score
-								+ " diem nay, thich vai. hi hi ^^")
+				.setMessage("I got " + scorePoint.intValue() + "!!!")
+				//.setName("I got " + scorePoint.intValue() + "!!!")
+				.setName("Vocabulary")
+				.setCaption("I got " + scorePoint.intValue() + "!!!")
+				//.setCaption("Vocabulary")
+				.setDescription("I got " + scorePoint.intValue() + "!!!")
+				.setLink("https://play.google.com/store/apps/details?id=com.it.vocabulary")
+				.build();
+		simpleFacebookInstance.publish(feed, onPublishListener);
+	}
+
+	public static void shareApp(SimpleFacebook simpleFacebookInstance,final Context context) {
+		LogUtils.logInfo("start share");
+		OnPublishListener onPublishListener = new OnPublishListener() {
+			@Override
+			public void onComplete(String postId) {
+				LogUtils.logInfo("share score successfully");
+				Toast.makeText(context, "Share app successfully", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onFail(String reason) {
+				LogUtils.logInfo("Error:" + reason);
+				Toast.makeText(context, "Error:" + reason, Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onThinking() {
+				LogUtils.logInfo("thinking...");
+				Toast.makeText(context, "Start sharing", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onException(Throwable throwable) {
+				LogUtils.logInfo("Exception:" + throwable.toString());
+			}
+			
+			
+
+		};
+		Feed feed = new Feed.Builder().setMessage("Vocabulary")
+				.setName("Vocabulary").setCaption("Vocabulary")
 				.setDescription("Vocabulary")
-				.setLink("https://www.facebook.com").build();
-		simpleFacebookInstance.publish(feed, true, onPublishListener);
+				.setLink("https://play.google.com/store/apps/details?id=com.it.vocabulary").build();
+		simpleFacebookInstance.publish(feed, onPublishListener);
 	}
 
 }

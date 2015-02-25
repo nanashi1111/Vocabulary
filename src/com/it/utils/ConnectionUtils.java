@@ -18,6 +18,7 @@ public class ConnectionUtils {
 	private static final String API_GET_ALL_TOPIC = API_ROOT + "topic/getlist";
 	private static final String API_GET_IDIOM_FROM_TOPIC = API_ROOT
 			+ "topic/getidiomoftopic";
+	private static final String API_SEND_USER_DATA = API_ROOT + "user/postinfo";
 
 	// add a idiom to a topic
 	public static void addIdiomToTopic(Idiom idiom, Topic topic,
@@ -62,6 +63,15 @@ public class ConnectionUtils {
 		RequestParams params = new RequestParams();
 		params.put("topic_id", topicId);
 		post(API_GET_IDIOM_FROM_TOPIC, params, handler);
+	}
+
+	// send user data
+	public static void sendUserData(String gcmId, String deviceId,
+			JsonHttpResponseHandler handler) {
+		RequestParams params = new RequestParams();
+		params.put("gcm_id", gcmId);
+		params.put("device_id", deviceId);
+		post(API_SEND_USER_DATA, params, handler);
 	}
 
 	public static boolean checkConnection(Context context) {

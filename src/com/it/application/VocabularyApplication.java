@@ -1,8 +1,10 @@
 package com.it.application;
 
 import android.app.Application;
+import android.content.Intent;
 
 import com.it.database.DBHelper;
+import com.it.services.GetGCMInfoService;
 import com.it.utils.Constant;
 import com.sromku.simple.fb.Permission;
 import com.sromku.simple.fb.SimpleFacebook;
@@ -21,7 +23,7 @@ public class VocabularyApplication extends Application {
 				.build();
 		SimpleFacebook.setConfiguration(configuration);
 		// get GCM info
-		//startService(new Intent(this, GetGCMInfoService.class));
+		startService(new Intent(this, GetGCMInfoService.class));
 		
 		//prepare db
 		DBHelper dbh = new DBHelper(this);

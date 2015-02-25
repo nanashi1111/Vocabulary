@@ -38,7 +38,7 @@ public class ListListAdapter extends ArrayAdapter<List>{
 		ImageView ivSelection = (ImageView)v.findViewById(R.id.selection);
 		ivSelection.setVisibility(View.VISIBLE);
 		if(position == selection){
-			ivSelection.setImageResource(R.drawable.done_trans);
+			ivSelection.setImageResource(R.drawable.choose);
 		}
 		return v;
 	}

@@ -6,34 +6,37 @@ import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.text.Html;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import com.it.adapters.ListListAdapter;
 import com.it.adapters.ListTopicAdapter;
 import com.it.fragments.ExamFragment;
 import com.it.fragments.ListFragments;
 import com.it.fragments.NavigationDrawerFragment;
 import com.it.fragments.RandomIdiomFragment;
+import com.it.models.ICollection;
 import com.it.models.Idiom;
 import com.it.models.List;
 import com.it.models.Topic;
 import com.it.utils.ConnectionUtils;
+import com.it.utils.DataUtils;
 import com.it.utils.LogUtils;
 import com.it.utils.PreferenceUtils;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -47,16 +50,23 @@ public class HomeActivity extends BaseActivity {
 	public static final int STATE_RANDOM = 1;
 	public static final int STATE_LISTS = 2;
 	public static final int STATE_EXAM = 3;
+	public static final int STATE_RESULT = 4;
 	public static int currentState = STATE_RANDOM;
 
 	public RandomIdiomFragment randomFragment;
 	public ListFragments listFragment;
-	private ExamFragment examFragment;
+	public ExamFragment examFragment;
+	
+	private ImageView ivRandom, ivList, ivExam, ivDictionary;
+	private TextView tvRandom, tvList, tvExam, tvDictionary;
+
+	// public ResultFragment resultFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_menu);
+		DataUtils.listActivity.add(this);
 		setupView();
 		setupActionBar();
 		// if data empty, show dialog to download data
@@ -65,13 +75,28 @@ public class HomeActivity extends BaseActivity {
 		}
 		// if data is downloaded, show random screen
 		else {
+			String command = getIntent().getStringExtra("command");
+			if(command == null){
+				command = "";
+			}
+			if(!command.equals("CLEAR")){
 			randomFragment = new RandomIdiomFragment();
 			Bundle bundle = new Bundle();
-			bundle.putBoolean("from_list_fragment", false);
+			bundle.putInt("from_list_fragment", ICollection.TYPE_TOPIC);
 			bundle.putBoolean("random_load", true);
 			// randomFragment.setArguments(bundle);
 			switchContent(R.id.container, randomFragment, bundle);
 			currentState = STATE_RANDOM;
+			setBackground();
+			}else{
+				for(int i=0;i<DataUtils.listActivity.size()-1;i++){
+					DataUtils.listActivity.get(i).finish();
+					
+				}
+				DataUtils.listActivity.clear();
+				DataUtils.listActivity.add(this);
+				showEverydayIdiom();
+			}
 		}
 	}
 
@@ -79,9 +104,10 @@ public class HomeActivity extends BaseActivity {
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 		actionBar.setDisplayShowTitleEnabled(true);
-		actionBar.setTitle("Vocabulary");
+		actionBar.setTitle(Html
+				.fromHtml("<font color=\"#FEDEB5\">Vocabulary</font>"));
 		actionBar.setBackgroundDrawable(new ColorDrawable(Color
-				.parseColor("#3391AB")));
+				.parseColor("#3F2140")));
 	}
 
 	@Override
@@ -90,35 +116,47 @@ public class HomeActivity extends BaseActivity {
 		case R.id.random:
 			LogUtils.logInfo("random");
 			if (currentState != STATE_RANDOM) {
-				randomFragment = new RandomIdiomFragment();
-				Bundle bundle = new Bundle();
-				bundle.putBoolean("from_list_fragment", false);
-				bundle.putBoolean("random_load", true);
-				// randomFragment.setArguments(bundle);
-				switchContent(R.id.container, randomFragment, bundle);
-				currentState = STATE_RANDOM;
+				if (currentState != STATE_EXAM) {
+					randomFragment = new RandomIdiomFragment();
+					Bundle bundle = new Bundle();
+					bundle.putInt("from_list_fragment", ICollection.TYPE_TOPIC);
+					bundle.putBoolean("random_load", true);
+					// randomFragment.setArguments(bundle);
+					switchContent(R.id.container, randomFragment, bundle);
+					currentState = STATE_RANDOM;
+					setBackground();
+				} else {
+					examFragment.showDialogCancelExam(STATE_RANDOM, false);
+				}
 			}
 			break;
 		case R.id.lists:
 			LogUtils.logInfo("list");
 			if (currentState != STATE_LISTS) {
-				listFragment = ListFragments.getInstance();
-				// take collection info to show
-				// in listFragment
-				String collectionType = randomFragment
-						.getCurrentCollectionType();
-				Bundle bundle = new Bundle();
-				bundle.putString("collection_type", collectionType);
-				if (collectionType.equals("topic")) {
-					bundle.putInt("collection_id",
-							randomFragment.getCurrentTopicID());
-				} else {
-					bundle.putInt("collection_id",
-							randomFragment.getCurrentListID());
-				}
-				switchContent(R.id.container, listFragment, bundle);
+				if (currentState != STATE_EXAM) {
+					listFragment = ListFragments.getInstance();
+					// take collection info to show
+					// in listFragment
+					int collectionType = randomFragment
+							.getCurrentCollectionType();
+					Bundle bundle = new Bundle();
+					bundle.putInt("collection_type", collectionType);
+					if (collectionType == ICollection.TYPE_TOPIC) {
+						bundle.putInt("collection_id",
+								randomFragment.getCurrentTopicID());
+					} else if(collectionType == ICollection.TYPE_LIST){
+						bundle.putInt("collection_id",
+								randomFragment.getCurrentListID());
+					} else if(collectionType == ICollection.TYPE_EVERYDAY_IDIOM){
+						
+					}
+					switchContent(R.id.container, listFragment, bundle);
 
-				currentState = STATE_LISTS;
+					currentState = STATE_LISTS;
+					setBackground();
+				} else {
+					examFragment.showDialogCancelExam(STATE_LISTS, true);
+				}
 			}
 			break;
 		case R.id.exam:
@@ -127,11 +165,27 @@ public class HomeActivity extends BaseActivity {
 				examFragment = ExamFragment.getInstance();
 				switchContent(R.id.container, examFragment, null);
 				currentState = STATE_EXAM;
+				setBackground();
 			}
 			break;
 		case R.id.dictionary:
 			LogUtils.logInfo("dictionary");
-			// switchContent(R.id.container, RandomIdiomFragment.getInstance());
+			if(currentState == STATE_RANDOM){
+				randomFragment.focusOnSearchBar();
+			}else{
+				if (currentState != STATE_EXAM) {
+					randomFragment = new RandomIdiomFragment(true);
+					Bundle bundle = new Bundle();
+					bundle.putInt("from_list_fragment", ICollection.TYPE_TOPIC);
+					bundle.putBoolean("random_load", true);
+					// randomFragment.setArguments(bundle);
+					switchContent(R.id.container, randomFragment, bundle);
+					currentState = STATE_RANDOM;
+					setBackground();
+				} else {
+					examFragment.showDialogCancelExam(STATE_RANDOM, true);
+				}
+			}
 			break;
 		}
 	}
@@ -148,6 +202,18 @@ public class HomeActivity extends BaseActivity {
 		findViewById(R.id.dictionary).setOnClickListener(this);
 		findViewById(R.id.lists).setOnClickListener(this);
 		findViewById(R.id.exam).setOnClickListener(this);
+		
+		//image view
+		ivRandom = (ImageView)findViewById(R.id.ic_random);
+		ivList = (ImageView)findViewById(R.id.ic_list);
+		ivExam = (ImageView)findViewById(R.id.ic_exam);
+		ivDictionary = (ImageView)findViewById(R.id.ic_dictionary);
+		
+		//textview
+		tvRandom = (TextView)findViewById(R.id.tv_random);
+		tvList = (TextView)findViewById(R.id.tv_lists);
+		tvExam = (TextView)findViewById(R.id.tv_exam);
+		tvDictionary = (TextView)findViewById(R.id.tv_dictionary);
 	}
 
 	// private void getFacebookId() {
@@ -166,6 +232,10 @@ public class HomeActivity extends BaseActivity {
 
 	@Override
 	public void onBackPressed() {
+//		int runtimeCount = PreferenceUtils.getRunTimeCount(this);
+//		if(runtimeCount % 2 == 1){
+//		showDiglogExit();
+//		}
 		showDiglogExit();
 	}
 
@@ -180,6 +250,8 @@ public class HomeActivity extends BaseActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+
+	
 	private void showDialogDownloadData() {
 		new AlertDialog.Builder(this)
 				.setMessage(
@@ -192,7 +264,7 @@ public class HomeActivity extends BaseActivity {
 						// download random topic
 						RandomIdiomFragment randomFragment = new RandomIdiomFragment();
 						Bundle bundle = new Bundle();
-						bundle.putBoolean("from_list_fragment", false);
+						bundle.putInt("from_list_fragment", ICollection.TYPE_TOPIC);
 						// randomFragment.setArguments(bundle);
 						switchContent(R.id.container, randomFragment, bundle);
 						currentState = STATE_RANDOM;
@@ -223,42 +295,57 @@ public class HomeActivity extends BaseActivity {
 			@Override
 			public void onSuccess(int statusCode, Header[] headers,
 					final JSONObject response) {
-				new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							// array json idiom
-							JSONArray idiomJsonArray = response
-									.getJSONArray("data");
-							// get idioms from array
-							for (int i = 0; i < idiomJsonArray.length(); i++) {
-								JSONObject idiomJson = idiomJsonArray
-										.getJSONObject(i);
-								Idiom idiom = new Idiom(idiomJson);
-								// save to db
-								dbh.addIdiomToDatabase(idiom);
-								LogUtils.logInfo("Idiom:" + idiom.getName());
-							}
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-					}
-				}).run();
-
-				downloadTopicsFromServer();
+				new SaveIdiomToDatabase().execute(response);
 			}
 		};
 		ConnectionUtils.getListIdiom(handler);
+	}
+
+	private class SaveIdiomToDatabase extends AsyncTask<JSONObject, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			makeToast("Downloading data...");
+		}
+
+		@Override
+		protected Void doInBackground(JSONObject... params) {
+			JSONObject response = params[0];
+			try {
+				// array json idiom
+				JSONArray idiomJsonArray = response.getJSONArray("data");
+				// get idioms from array
+				for (int i = 0; i < idiomJsonArray.length(); i++) {
+					JSONObject idiomJson = idiomJsonArray.getJSONObject(i);
+					Idiom idiom = new Idiom(idiomJson);
+					// save to db
+					dbh.addIdiomToDatabase(idiom);
+					LogUtils.logInfo("Idiom:" + idiom.getName());
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			downloadTopicsFromServer();
+		}
+
 	}
 
 	public void showDialogSelectCollection(final int type) {
 		final Dialog dialog = new Dialog(this);
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		dialog.setContentView(R.layout.dialog_select_collection);
+		final TextView tvTitle = (TextView) dialog
+				.findViewById(R.id.dialog_select_collection_title);
 		final ListView lvListTopic = (ListView) dialog
 				.findViewById(R.id.collection);
 		if (type == 1) { // topic
+			tvTitle.setText("Select a topic");
 			final ArrayList<Topic> listTopic = dbh.getListTopic();
 			final ListTopicAdapter adapter = new ListTopicAdapter(this, 1,
 					listTopic);
@@ -281,9 +368,28 @@ public class HomeActivity extends BaseActivity {
 					// dialog.dismiss();
 					adapter.setSelection(position);
 					adapter.notifyDataSetChanged();
+					int selection = position;
+					if (selection == -1) {
+						makeToast("You must select a topic first");
+					} else {
+						// show topic selected
+						ArrayList<Topic> listTopic = ((ListTopicAdapter) lvListTopic
+								.getAdapter()).getListTopic();
+						Topic topic = listTopic.get(selection);
+						randomFragment = new RandomIdiomFragment();
+						Bundle bundle = new Bundle();
+						bundle.putInt("from_list_fragment", ICollection.TYPE_TOPIC);
+						bundle.putBoolean("random_load", false);
+						bundle.putInt("topic_id", topic.getTopicId());
+						// randomFragment.setArguments(bundle);
+						switchContent(R.id.container, randomFragment, bundle);
+						currentState = STATE_RANDOM;
+						dialog.dismiss();
+					}
 				}
 			});
 		} else { // list
+			tvTitle.setText("Select a list");
 			final ArrayList<List> lists = dbh.getAllList();
 			final ListListAdapter adapter = new ListListAdapter(this, 1, lists);
 			lvListTopic.setAdapter(adapter);
@@ -304,10 +410,28 @@ public class HomeActivity extends BaseActivity {
 					// dialog.dismiss();
 					adapter.setSelection(position);
 					adapter.notifyDataSetChanged();
+					int selection = position;
+					if (selection == -1) {
+						makeToast("You must select a list first");
+					} else {
+						ArrayList<List> lists = ((ListListAdapter) lvListTopic
+								.getAdapter()).getLists();
+						// show topic selected
+						List list = lists.get(selection);
+						randomFragment = new RandomIdiomFragment();
+						Bundle bundle = new Bundle();
+						bundle.putInt("from_list_fragment", ICollection.TYPE_LIST);
+						bundle.putInt("list_id", list.getListId());
+						// randomFragment.setArguments(bundle);
+						switchContent(R.id.container, randomFragment, bundle);
+						currentState = STATE_RANDOM;
+						dialog.dismiss();
+					}
 				}
 			});
 		}
 		ImageView btCancel = (ImageView) dialog.findViewById(R.id.cancel);
+		btCancel.setVisibility(View.INVISIBLE);
 		btCancel.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -316,6 +440,7 @@ public class HomeActivity extends BaseActivity {
 			}
 		});
 		ImageView btDone = (ImageView) dialog.findViewById(R.id.done);
+		btDone.setVisibility(View.INVISIBLE);
 		btDone.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -332,7 +457,7 @@ public class HomeActivity extends BaseActivity {
 						Topic topic = listTopic.get(selection);
 						randomFragment = new RandomIdiomFragment();
 						Bundle bundle = new Bundle();
-						bundle.putBoolean("from_list_fragment", false);
+						bundle.putInt("from_list_fragment", ICollection.TYPE_TOPIC);
 						bundle.putBoolean("random_load", false);
 						bundle.putInt("topic_id", topic.getTopicId());
 						// randomFragment.setArguments(bundle);
@@ -352,7 +477,7 @@ public class HomeActivity extends BaseActivity {
 						List list = lists.get(selection);
 						randomFragment = new RandomIdiomFragment();
 						Bundle bundle = new Bundle();
-						bundle.putBoolean("from_list_fragment", true);
+						bundle.putInt("from_list_fragment", ICollection.TYPE_LIST);
 						bundle.putInt("list_id", list.getListId());
 						// randomFragment.setArguments(bundle);
 						switchContent(R.id.container, randomFragment, bundle);
@@ -365,50 +490,68 @@ public class HomeActivity extends BaseActivity {
 		dialog.setCancelable(true);
 		dialog.show();
 	}
+	
+	public void showEverydayIdiom(){
+		randomFragment = new RandomIdiomFragment();
+		Bundle bundle = new Bundle();
+		bundle.putInt("from_list_fragment", ICollection.TYPE_EVERYDAY_IDIOM);
+		// randomFragment.setArguments(bundle);
+		switchContent(R.id.container, randomFragment, bundle);
+		currentState = STATE_RANDOM;
+	}
+	
 
 	private void downloadTopicsFromServer() {
 		JsonHttpResponseHandler handler = new JsonHttpResponseHandler() {
 			@Override
 			public void onSuccess(int statusCode, Header[] headers,
 					final JSONObject response) {
-				new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							JSONArray topicJsonArray = response
-									.getJSONArray("data");
-							for (int i = 0; i < topicJsonArray.length(); i++) {
-								Topic topic = new Topic(topicJsonArray
-										.getJSONObject(i));
-								dbh.addTopicToDatabase(topic);
-								LogUtils.logInfo("Topic:" + topic.getName());
-							}
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-					}
-				}).run();
-
-				LogUtils.logInfo("finished download data");
-				// hide dialog
-				hideProgressDialog();
-				// mark application as downloaded data
-				PreferenceUtils.setDownloadedData(HomeActivity.this, true);
-				// notify
-				Toast.makeText(HomeActivity.this, "Data downloaded",
-						Toast.LENGTH_LONG).show();
-				// show random idiom screen
-				RandomIdiomFragment randomFragment = new RandomIdiomFragment();
-				Bundle bundle = new Bundle();
-				bundle.putBoolean("from_list_fragment", false);
-				// randomFragment.setArguments(bundle);
-				switchContent(R.id.container, randomFragment, bundle);
-				currentState = STATE_RANDOM;
-
+				new SaveTopicsToDatabase().execute(response);
 			}
 		};
 		ConnectionUtils.getListTopic(handler);
+	}
+
+	private class SaveTopicsToDatabase extends
+			AsyncTask<JSONObject, Void, Void> {
+
+		@Override
+		protected Void doInBackground(JSONObject... params) {
+			JSONObject response = params[0];
+			try {
+				JSONArray topicJsonArray = response.getJSONArray("data");
+				for (int i = 0; i < topicJsonArray.length(); i++) {
+					Topic topic = new Topic(topicJsonArray.getJSONObject(i));
+					dbh.addTopicToDatabase(topic);
+					LogUtils.logInfo("Topic:" + topic.getName());
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			LogUtils.logInfo("finished download data");
+			// hide dialog
+			hideProgressDialog();
+			// mark application as downloaded data
+			PreferenceUtils.setDownloadedData(HomeActivity.this, true);
+			// notify
+			Toast.makeText(HomeActivity.this, "Data downloaded",
+					Toast.LENGTH_LONG).show();
+			// show random idiom screen
+			RandomIdiomFragment randomFragment = new RandomIdiomFragment();
+			Bundle bundle = new Bundle();
+			bundle.putInt("from_list_fragment", ICollection.TYPE_TOPIC);
+			bundle.putBoolean("random_load", true);
+			// randomFragment.setArguments(bundle);
+			switchContent(R.id.container, randomFragment, bundle);
+			currentState = STATE_RANDOM;
+			setBackground();
+		}
+
 	}
 
 	public RandomIdiomFragment getRandomFragment() {
@@ -442,5 +585,47 @@ public class HomeActivity extends BaseActivity {
 	public static void setCurrentState(int currentState) {
 		HomeActivity.currentState = currentState;
 	}
+
+	@SuppressWarnings("deprecation")
+	public void setBackground() {
+		if ((currentState == STATE_RANDOM) || (currentState == STATE_LISTS)) {
+			findViewById(R.id.container).setBackgroundDrawable(
+					new ColorDrawable(Color.parseColor("#FEDEB5")));
+		} else {
+			findViewById(R.id.container).setBackgroundDrawable(
+					new ColorDrawable(Color.parseColor("#E6E8E7")));
+		}
+		if(currentState == STATE_RANDOM){
+			ivRandom.setImageResource(R.drawable.ic_random_selected);
+			tvRandom.setTextColor(Color.parseColor("#00FFC6"));
+			ivList.setImageResource(R.drawable.ic_lists);
+			tvList.setTextColor(Color.parseColor("#FFFFFF"));
+			ivExam.setImageResource(R.drawable.ic_exam);
+			tvExam.setTextColor(Color.parseColor("#FFFFFF"));
+			ivDictionary.setImageResource(R.drawable.ic_search);
+			tvDictionary.setTextColor(Color.parseColor("#FFFFFF"));
+		}else if(currentState == STATE_LISTS){
+			ivRandom.setImageResource(R.drawable.ic_random);
+			tvRandom.setTextColor(Color.parseColor("#FFFFFF"));
+			ivList.setImageResource(R.drawable.ic_lists_selected);
+			tvList.setTextColor(Color.parseColor("#00FFC6"));
+			ivExam.setImageResource(R.drawable.ic_exam);
+			tvExam.setTextColor(Color.parseColor("#FFFFFF"));
+			ivDictionary.setImageResource(R.drawable.ic_search);
+			tvDictionary.setTextColor(Color.parseColor("#FFFFFF"));
+		}else if(currentState == STATE_EXAM){
+			ivRandom.setImageResource(R.drawable.ic_random);
+			tvRandom.setTextColor(Color.parseColor("#FFFFFF"));
+			ivList.setImageResource(R.drawable.ic_lists);
+			tvList.setTextColor(Color.parseColor("#FFFFFF"));
+			ivExam.setImageResource(R.drawable.ic_exam_selected);
+			tvExam.setTextColor(Color.parseColor("#00FFC6"));
+			ivDictionary.setImageResource(R.drawable.ic_search);
+			tvDictionary.setTextColor(Color.parseColor("#FFFFFF"));
+		}
+
+	}
+	
+	
 
 }

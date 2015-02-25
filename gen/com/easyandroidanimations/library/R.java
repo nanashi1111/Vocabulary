@@ -8,7 +8,7 @@ package com.easyandroidanimations.library;
 
 public final class R {
 	public static final class drawable {
-		public static final int ic_launcher = 0x7f0200aa;
+		public static final int ic_launcher = 0x7f0200b4;
 	}
 	public static final class string {
 		public static final int app_name = 0x7f050000;

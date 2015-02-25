@@ -1,15 +1,21 @@
 package com.it.services;
 
 import java.io.IOException;
+import org.apache.http.Header;
+import org.json.JSONObject;
 import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.it.utils.ConnectionUtils;
 import com.it.utils.Constant;
 import com.it.utils.LogUtils;
+import com.it.utils.PreferenceUtils;
+import com.loopj.android.http.JsonHttpResponseHandler;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.provider.Settings.Secure;
 import android.widget.Toast;
 
 public class GetGCMInfoService extends Service {
@@ -35,9 +41,9 @@ public class GetGCMInfoService extends Service {
 			new RegisterGCM().execute();
 		//if already registered, stop service
 		}else{
-			Toast.makeText(GetGCMInfoService.this, deviceToken,
-					Toast.LENGTH_LONG).show();
-			stopSelf();
+			LogUtils.logInfo("Device Token:"+deviceToken);
+			LogUtils.logInfo("Device ID:"+getDeviceID());
+			sendUserData();
 		}
 	}
 
@@ -61,9 +67,7 @@ public class GetGCMInfoService extends Service {
 			//if success, stop service 
 			} else {
 				LogUtils.logInfo("Complete registering GCM");
-				Toast.makeText(GetGCMInfoService.this, deviceToken,
-						Toast.LENGTH_LONG).show();
-				stopSelf();
+				sendUserData();
 			}
 		}
 
@@ -75,8 +79,37 @@ public class GetGCMInfoService extends Service {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			//Toast.makeText(GetGCMInfoService.this, gcm.toString(), Toast.LENGTH_LONG).show();
 			return null;
 		}
 
 	}
+	
+	private String getDeviceID(){
+		return Secure.getString(getContentResolver(), Secure.ANDROID_ID);
+	}
+	
+	private void sendUserData(){
+		//check sent data
+		boolean sent = PreferenceUtils.isSentData(this);
+		if(!sent){
+			JsonHttpResponseHandler handler = new JsonHttpResponseHandler(){
+
+				@Override
+				public void onSuccess(int statusCode, Header[] headers,
+						JSONObject response) {
+					LogUtils.logInfo("Send data:"+response.toString());
+					PreferenceUtils.setSentUserData(GetGCMInfoService.this, true);
+					stopSelf();
+				}
+				
+			};
+			String gcmId = GCMRegistrar
+					.getRegistrationId(GetGCMInfoService.this);
+			String deviceId = getDeviceID();
+			ConnectionUtils.sendUserData(gcmId, deviceId, handler);
+		}
+		stopSelf();
+	}
+	
 }

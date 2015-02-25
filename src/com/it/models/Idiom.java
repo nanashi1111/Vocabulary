@@ -73,6 +73,9 @@ public class Idiom {
 
 	public void setNote(String note) {
 		this.note = note;
+		if((note == null)||(note.equalsIgnoreCase("null"))){
+			this.note = "";
+		}
 	}
 
 	public String getDateCreate() {

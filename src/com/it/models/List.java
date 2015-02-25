@@ -2,7 +2,7 @@ package com.it.models;
 
 import java.util.ArrayList;
 
-public class List{
+public class List implements ICollection{
 	
 	private int listId;
 	private String name;
@@ -31,12 +31,24 @@ public class List{
 		this.name = name;
 	}
 
+	@Override
 	public ArrayList<Idiom> getListIdiom() {
 		return listIdiom;
 	}
 
+	@Override
 	public void setListIdiom(ArrayList<Idiom> listIdiom) {
 		this.listIdiom = listIdiom;
+	}
+
+	@Override
+	public int getCollectionType() {
+		return ICollection.TYPE_LIST;
+	}
+
+	@Override
+	public int getId() {
+		return listId;
 	}
 	
 	

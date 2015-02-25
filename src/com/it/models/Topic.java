@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Topic{
+public class Topic implements ICollection {
 	private int topicId;
 	private String name;
 	private String description;
@@ -21,7 +21,7 @@ public class Topic{
 			topicId = Integer.parseInt(json.getString("topic_id"));
 			name = json.getString("name");
 			description = json.getString("description");
-			//idiomCount = Integer.parseInt(json.getString("idiom_count"));
+			// idiomCount = Integer.parseInt(json.getString("idiom_count"));
 			idiomCount = 100;
 			dateCreate = json.getString("date_create");
 		} catch (NumberFormatException e) {
@@ -72,12 +72,24 @@ public class Topic{
 		this.dateCreate = dateCreate == null ? "" : dateCreate;
 	}
 
+	@Override
+	public void setListIdiom(ArrayList<Idiom> listIdiom) {
+		this.listIdiom = listIdiom;
+	}
+
+	@Override
 	public ArrayList<Idiom> getListIdiom() {
 		return listIdiom == null ? new ArrayList<Idiom>() : listIdiom;
 	}
 
-	public void setListIdiom(ArrayList<Idiom> listIdiom) {
-		this.listIdiom = listIdiom;
+	@Override
+	public int getCollectionType() {
+		return ICollection.TYPE_TOPIC;
+	}
+
+	@Override
+	public int getId() {
+		return topicId;
 	}
 
 }

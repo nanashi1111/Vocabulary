@@ -6,13 +6,16 @@ import com.it.database.DBHelper;
 
 public class Exam {
 
-	public static final int NUMBER_QUESTION = 15;
+	public static final int NUMBER_QUESTION = 10;
+	public static final int POINT_PER_QUESTION = 10;
 
 	private ArrayList<Question> listQuestion;
 	private DBHelper dbh;
+	@SuppressWarnings("unused")
 	private Question currentQuestion;
 	private int currentPosition;
 	private int point;
+	@SuppressWarnings("unused")
 	private boolean isCompleted;
 
 	public Exam(DBHelper dbh) {

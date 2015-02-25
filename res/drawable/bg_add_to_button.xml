@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/color_random_idiom_screen_main_bg"/>
+    <stroke android:width="1dip" android:color="@color/color_footer_bg"/>
+</shape>

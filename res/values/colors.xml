@@ -4,11 +4,21 @@
     <color name="white">#FFFFFF</color>
     <color name="blue">#3391AB</color>
     <color name="light_blue">#DAEDFE</color>
-	<color name="black">#000000</color>
-	<color name="grey">#E6E8E7</color>
-	<color name="dark_blue">#01C5FF</color>
-	<color name="dark_gray">#222222</color>
-	<color name="red">#BB0000</color>
-	<color name="add_to_list_color">#419E89</color>
-    
+    <color name="black">#000000</color>
+    <color name="grey">#E6E8E7</color>
+    <color name="dark_blue">#01C5FF</color>
+    <color name="dark_gray">#222222</color>
+    <color name="red">#BB0000</color>
+    <color name="color_footer_selected">#00FFC6</color>
+    <color name="add_to_list_color">#419E89</color>
+    <color name="color_action_bar_text">#F2CDA0</color>
+    <color name="color_action_bar">#3F2140</color>
+    <color name="color_random_idiom_screen_main_bg">#FEDEB5</color>
+    <color name="color_random_idiom_screen_idiom_bg">#F2CDA0</color>
+    <color name="color_random_add_to_list_text">#593831</color>
+    <color name="color_footer_bg">#593831</color>
+    <color name="color_score_broad_boder">#3391AC</color>
+    <color name="color_exam_bg">#D7D7D7</color>
+    <color name="color_share_fb">#00ffc6</color>
+
 </resources>

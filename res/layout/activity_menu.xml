@@ -14,12 +14,14 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/footer" >
+            android:layout_above="@+id/footer"
+            android:background="@color/color_random_idiom_screen_main_bg" >
 
             <LinearLayout
                 android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                
                 android:orientation="vertical" >
             </LinearLayout>
 
