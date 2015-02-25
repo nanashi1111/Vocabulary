@@ -18,10 +18,11 @@ import com.it.utils.DateUtils;
 public class DBHelper extends SQLiteOpenHelper {
 
 	private static final String DB_NAME = "VocabularyDB";
-	private static final int DB_VERSION = 3;
+	private static final int DB_VERSION = 4;
 	private static final String CREATE_TABLE_IDIOM = "create table Idiom(id integer primary key, name text, definition text, sample text, note text, date_create text, topic_id integer, list_id integer);";
 	private static final String CREATE_TABLE_TOPIC = "create table Topic(topic_id integer primary key, name text, description text, idiom_count integer, date_create text);";
 	private static final String CREATE_TABLE_LIST = "create table List(list_id integer primary key autoincrement, name text);";
+	private static final String CREATE_TABLE_LIST_DETAIL = "create table ListDetail(id integer primary key autoincrement, list_id integer, idiom_id integer);";
 	private static final String CREATE_TABLE_EVERY_IDIOM = "create table EveryDayIdiom(ids text, start_date text);";
 
 	public DBHelper(Context context) {
@@ -33,6 +34,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		db.execSQL(CREATE_TABLE_IDIOM);
 		db.execSQL(CREATE_TABLE_TOPIC);
 		db.execSQL(CREATE_TABLE_LIST);
+		db.execSQL(CREATE_TABLE_LIST_DETAIL);
 		db.execSQL(CREATE_TABLE_EVERY_IDIOM);
 	}
 
@@ -41,6 +43,8 @@ public class DBHelper extends SQLiteOpenHelper {
 		db.execSQL("drop table if exists Idiom");
 		db.execSQL("drop table if exists Topic");
 		db.execSQL("drop table if exists List");
+		db.execSQL("drop table if exists ListDetail");
+		db.execSQL("drop table if exists EveryDayIdiom");
 		onCreate(db);
 	}
 
@@ -314,11 +318,20 @@ public class DBHelper extends SQLiteOpenHelper {
 		return cursor.getCount();
 	}
 
+	// public void addIdiomToList(Idiom idiom, List list) {
+	// ContentValues contentValues = new ContentValues();
+	// contentValues.put("list_id", list.getListId());
+	// getWritableDatabase().update("Idiom", contentValues, "id = ?",
+	// new String[] { idiom.getId() + "" });
+	// }
+
 	public void addIdiomToList(Idiom idiom, List list) {
-		ContentValues contentValues = new ContentValues();
-		contentValues.put("list_id", list.getListId());
-		getWritableDatabase().update("Idiom", contentValues, "id = ?",
-				new String[] { idiom.getId() + "" });
+		if (!checkIdiomInList(idiom, list)) {
+			ContentValues contentValues = new ContentValues();
+			contentValues.put("idiom_id", idiom.getId());
+			contentValues.put("list_id", list.getListId());
+			getWritableDatabase().insert("ListDetail", null, contentValues);
+		}
 	}
 
 	public ArrayList<List> getAllList() {
@@ -428,8 +441,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	public ArrayList<Idiom> getListIdiomOfList(List list) {
 		ArrayList<Idiom> listIdiom = new ArrayList<Idiom>();
-		String query = "select * from Idiom where list_id = "
-				+ list.getListId();
+		String query = "select Idiom.id, name, definition, sample, note, date_create, topic_id, Idiom.list_id from Idiom, ListDetail where Idiom.id = ListDetail.idiom_id and ListDetail.list_id = "+list.getListId();
+//		String query = "select * from Idiom where list_id = "
+//				+ list.getListId();
 		Cursor cursor = getReadableDatabase().rawQuery(query, null);
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -455,7 +469,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	public ArrayList<Idiom> getListIdiomOfList(int listId) {
 		ArrayList<Idiom> listIdiom = new ArrayList<Idiom>();
-		String query = "select * from Idiom where list_id = " + listId;
+		String query = "select Idiom.id, name, definition, sample, note, date_create, topic_id, Idiom.list_id from Idiom, ListDetail where Idiom.id = ListDetail.idiom_id and ListDetail.list_id = "+listId;
+//		String query = "select * from Idiom where list_id = " + listId;
 		Cursor cursor = getReadableDatabase().rawQuery(query, null);
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -496,15 +511,10 @@ public class DBHelper extends SQLiteOpenHelper {
 	}
 
 	public boolean checkIdiomInList(Idiom idiom, List list) {
-		String query = "select list_id from Idiom where id = " + idiom.getId();
+		String query = "select list_id from ListDetail where idiom_id = "
+				+ idiom.getId() + " and list_id = " + list.getListId();
 		Cursor cursor = getReadableDatabase().rawQuery(query, null);
-		if (cursor.getCount() > 0) {
-			cursor.moveToFirst();
-			int idiomListId = cursor.getInt(0);
-			return idiomListId == list.getListId();
-		} else {
-			return false;
-		}
+		return cursor.getCount() > 0;
 	}
 
 	@SuppressLint("NewApi")

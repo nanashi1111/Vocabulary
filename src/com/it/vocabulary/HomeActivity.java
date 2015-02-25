@@ -384,6 +384,7 @@ public class HomeActivity extends BaseActivity {
 						// randomFragment.setArguments(bundle);
 						switchContent(R.id.container, randomFragment, bundle);
 						currentState = STATE_RANDOM;
+						setBackground();
 						dialog.dismiss();
 					}
 				}
@@ -426,6 +427,7 @@ public class HomeActivity extends BaseActivity {
 						switchContent(R.id.container, randomFragment, bundle);
 						currentState = STATE_RANDOM;
 						dialog.dismiss();
+						setBackground();
 					}
 				}
 			});
@@ -498,6 +500,7 @@ public class HomeActivity extends BaseActivity {
 		// randomFragment.setArguments(bundle);
 		switchContent(R.id.container, randomFragment, bundle);
 		currentState = STATE_RANDOM;
+		setBackground();
 	}
 	
 

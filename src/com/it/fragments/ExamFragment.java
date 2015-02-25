@@ -242,7 +242,7 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 			final boolean randomScreenFocusSearchBar) {
 		new AlertDialog.Builder(getActivity())
 				.setMessage(
-						"You are doing a test, do you want to cancel the test? <Dung ngu phap ko day :v>")
+						"You are doing a test, do you want to cancel the test?")
 				.setTitle("Exam")
 				.setNegativeButton("No", new DialogInterface.OnClickListener() {
 

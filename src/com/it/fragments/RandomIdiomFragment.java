@@ -443,7 +443,7 @@ public class RandomIdiomFragment extends BaseFragment implements
 				adapter.setSelection(position);
 				adapter.notifyDataSetChanged();
 				((ImageView) dialog.findViewById(R.id.add_selection))
-						.setImageResource(R.drawable.done_trans);
+						.setImageResource(R.drawable.ic_lang);
 			}
 		});
 		dialog.setCancelable(true);
@@ -483,8 +483,13 @@ public class RandomIdiomFragment extends BaseFragment implements
 								List list = ((BaseActivity) getActivity())
 										.getDBHelper().getNewCreatedList();
 								addIdiomToList(idiom, list);
+								
 								dialog.dismiss();
 							}
+						}
+						List listLike = dbh.getListById(1);
+						if(dbh.checkIdiomInList(getCurrenIdiom(), listLike)){
+							btLike.setImageResource(R.drawable.liked);
 						}
 					}
 				});
@@ -537,6 +542,10 @@ public class RandomIdiomFragment extends BaseFragment implements
 			Idiom idiom = getCurrenIdiom();
 			List list = dbh.getListById(2);
 			addIdiomToList(idiom, list);
+			List listLike = dbh.getListById(1);
+			if (checkIdiomInList(idiom, listLike)) {
+				btLike.setImageResource(R.drawable.liked);
+			}
 			break;
 		case R.id.like:
 			Idiom idiomToLike = getCurrenIdiom();
