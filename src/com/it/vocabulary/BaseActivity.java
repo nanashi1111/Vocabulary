@@ -2,16 +2,20 @@ package com.it.vocabulary;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.internal.di;
 import com.it.database.DBHelper;
 import com.it.utils.DataUtils;
 import com.it.utils.PreferenceUtils;
@@ -73,30 +77,43 @@ public abstract class BaseActivity extends ActionBarActivity implements
 		mFragmentManager.beginTransaction().replace(contentId, fragment)
 				.commit();
 	}
+	
+	@SuppressLint("NewApi")
+	public void switchContent(int contentId,
+			android.support.v4.app.Fragment fragment) {
+		if (mFragmentManager == null) {
+			mFragmentManager = getSupportFragmentManager();
+		}
+		mFragmentManager.beginTransaction().replace(contentId, fragment)
+				.commit();
+	}
 
 	protected abstract void setupView();
 
-	protected void showDiglogExit() {
-		new AlertDialog.Builder(this).setTitle("Exit")
-				.setMessage("Are you sure want to exit")
-				.setNegativeButton("No", new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-
-					}
-				})
-				.setNeutralButton("Yes", new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						DataUtils.listActivity.remove(BaseActivity.this);
-						finish();
-						overridePendingTransition(0, 0);
-
-					}
-				}).setCancelable(true).show();
+	
+	protected void showDialogExit() {
+		final Dialog dialog = new Dialog(this);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.setContentView(R.layout.dialog_exit);
+		Button btYes = (Button)dialog.findViewById(R.id.yes);
+		btYes.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
+		Button btNo = (Button)dialog.findViewById(R.id.no);
+		btNo.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+		dialog.setCancelable(true);
+		dialog.show();
+		
 	}
 
 	@Override

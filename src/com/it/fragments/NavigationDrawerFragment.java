@@ -211,6 +211,7 @@ public class NavigationDrawerFragment extends Fragment {
 	}
 
 	private void selectItem(int position) {
+		if(!HomeActivity.downloadingData){
 		switch (position) {
 		case 0:
 			// show dialog select topic
@@ -230,6 +231,9 @@ public class NavigationDrawerFragment extends Fragment {
 		case 2:
 			((HomeActivity) getActivity()).showEverydayIdiom();	
 			break;
+		}
+		}else{
+			((HomeActivity)getActivity()).makeToast("Downloading data, please wait for a moment");
 		}
 		if (mDrawerLayout != null) {
 			mDrawerLayout.closeDrawer(mFragmentContainerView);

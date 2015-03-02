@@ -2,6 +2,7 @@ package com.it.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,7 +19,7 @@ import com.it.vocabulary.R;
 public class IdiomFragment extends BaseFragment implements OnClickListener {
 
 	private Idiom idiom;
-	private TextView tvIdiom, tvDefinition;
+	private TextView tvIdiom, tvDefinition, tvSample;
 	private LinearLayout llIdiom, llDefinition;
 	private View rootView;
 
@@ -43,6 +44,9 @@ public class IdiomFragment extends BaseFragment implements OnClickListener {
 		// set up textview to show definition
 		tvDefinition = (TextView) rootView.findViewById(R.id.idiom_definition);
 		tvDefinition.setText(idiom.getDefinition());
+		// sample
+		tvSample = (TextView) rootView.findViewById(R.id.idiom_sample);
+		tvSample.setText(idiom.getSample());
 		// set up broad to show idiom
 		llIdiom = (LinearLayout) rootView.findViewById(R.id.idiom_name_layout);
 		llIdiom.setOnClickListener(this);

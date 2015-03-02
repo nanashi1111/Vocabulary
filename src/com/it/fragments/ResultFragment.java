@@ -1,6 +1,7 @@
 package com.it.fragments;
 
 import com.it.models.Exam;
+import com.it.models.ICollection;
 import com.it.utils.FacebookUtils;
 import com.it.utils.PreferenceUtils;
 import com.it.vocabulary.HomeActivity;
@@ -90,7 +91,7 @@ public class ResultFragment extends BaseFragment implements OnClickListener {
 	private void showRandomIdiomFragment(){
 		((HomeActivity)getActivity()).setRandomFragment(new RandomIdiomFragment());
 		Bundle bundle = new Bundle();
-		bundle.putBoolean("from_list_fragment", false);
+		bundle.putInt("from_list_fragment", ICollection.TYPE_TOPIC);
 		bundle.putBoolean("random_load", true);
 		// randomFragment.setArguments(bundle);
 		((HomeActivity)getActivity()).switchContent(R.id.container, ((HomeActivity)getActivity()).getRandomFragment(), bundle);

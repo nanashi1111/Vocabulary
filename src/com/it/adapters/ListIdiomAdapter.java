@@ -23,7 +23,8 @@ public class ListIdiomAdapter extends ArrayAdapter<Idiom> {
 		this.listIdiom = objects;
 	}
 
-	@SuppressLint({ "ViewHolder", "InflateParams" }) @Override
+	@SuppressLint({ "ViewHolder", "InflateParams" })
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = null;
 		LayoutInflater inf = (LayoutInflater) context
@@ -35,6 +36,14 @@ public class ListIdiomAdapter extends ArrayAdapter<Idiom> {
 				.findViewById(R.id.idiom_definition);
 		tvIdiomDefinition.setText(listIdiom.get(position).getDefinition());
 		return v;
+	}
+
+	public ArrayList<Idiom> getListIdiom() {
+		return listIdiom;
+	}
+
+	public void setListIdiom(ArrayList<Idiom> listIdiom) {
+		this.listIdiom = listIdiom;
 	}
 
 }

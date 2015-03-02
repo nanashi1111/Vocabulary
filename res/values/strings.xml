@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Vocabulary</string>
+    <string name="app_name">English Idiom Pro</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="search">search</string>
@@ -20,9 +20,16 @@
     <string name="add_note">Add note</string>
     <string name="cancel">Cancel</string>
     <string name="add_to_list">Add to list</string>
+    <string name="exit">Exit</string>
+    <string name="ok">OK</string>
+    <string name="confirm_exit">Are you sure want to exit</string>
     <string name="add_new">Add new</string>
     <string name="share_score">Share score</string>
     <string name="share_app">Share this app</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="sample">Example</string>
+    <string name="confirm_cancel">You are doing a test, do you want to cancel the test?</string>
     <string name="banner_ad_unit_id">ca-app-pub-2928455978605682/5725531453</string>
     <string name="banner_full">ca-app-pub-2928455978605682/8678997854</string>
 

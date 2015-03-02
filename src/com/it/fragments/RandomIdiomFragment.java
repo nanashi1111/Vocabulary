@@ -35,6 +35,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.easyandroidanimations.library.FlipHorizontalToAnimation;
 import com.google.android.gms.ads.AdView;
@@ -56,6 +57,7 @@ import com.it.vocabulary.R;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.sromku.simple.fb.SimpleFacebook;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.internal.di;
 
 @SuppressLint("NewApi")
 public class RandomIdiomFragment extends BaseFragment implements
@@ -83,8 +85,8 @@ public class RandomIdiomFragment extends BaseFragment implements
 
 	/* use when current collection is everyday idiom */
 	private ICollection everyDayIdiom;
-	
-	/*current idiom*/
+
+	/* current idiom */
 	private Idiom currentIdiom;
 
 	/*
@@ -100,7 +102,6 @@ public class RandomIdiomFragment extends BaseFragment implements
 
 	/* viewpager adapter */
 	private IdiomPagerAdapter pagerAdapter;
-
 
 	/* rootview */
 	private View rootView;
@@ -133,7 +134,7 @@ public class RandomIdiomFragment extends BaseFragment implements
 		idiomPager.setOnPageChangeListener(this);
 		// set up search bar
 		searchBar = (AutoCompleteTextView) rootView
-				.findViewById(R.id.search_idiom);
+				.findViewById(R.id.search_idiom_random);
 		listWord = dbh.getListWord();
 		searchBar.setAdapter(new ArrayAdapter<String>(getActivity(),
 				android.R.layout.simple_list_item_1, listWord));
@@ -182,10 +183,14 @@ public class RandomIdiomFragment extends BaseFragment implements
 					showView(topic);
 				} else {
 					int topicId = getArguments().getInt("topic_id");
+					int pos = getArguments().getInt("position", -1);
 					// topic = loadTopicById(topicId);
 					topic = CollectionGenerator.getCollection(
 							ICollection.TYPE_TOPIC, topicId, dbh);
 					showView(topic);
+					if(pos!=-1){
+						idiomPager.setCurrentItem(pos, true);
+					}
 				}
 			}
 			// if from list fragment
@@ -196,22 +201,43 @@ public class RandomIdiomFragment extends BaseFragment implements
 			// ArrayList<Idiom> listIdiom = ((BaseActivity) getActivity())
 			// .getDBHelper().getListIdiomOfList(list);
 			// list.setListIdiom(listIdiom);
+			int pos = getArguments().getInt("position", -1);
 			list = CollectionGenerator.getCollection(ICollection.TYPE_LIST,
 					listId, dbh);
 			showView(list);
+			if(pos!=-1){
+				idiomPager.setCurrentItem(pos, true);
+			}
 		} else if (fromListFragment == ICollection.TYPE_EVERYDAY_IDIOM) {
 			everyDayIdiom = CollectionGenerator.getCollection(
 					ICollection.TYPE_EVERYDAY_IDIOM, -1, dbh);
+			int pos = getArguments().getInt("position", -1);
 			showView(everyDayIdiom);
+			if(pos!=-1){
+				idiomPager.setCurrentItem(pos, true);
+			}
 		}
 		if (listIdiom.size() > idiomPager.getCurrentItem()) {
-			currentIdiom =  listIdiom.get(idiomPager.getCurrentItem());
+			currentIdiom = listIdiom.get(idiomPager.getCurrentItem());
 		}
 		checkCurrentIdiomInLiked();
 		checkCurrentIdiomHasNote();
-		LogUtils.logInfo("focus search bar = " + focusSearchBar);
+
 		if (focusSearchBar) {
 			focusOnSearchBar();
+		}
+		switch (getCurrentCollectionType()) {
+		case ICollection.TYPE_TOPIC:
+			((HomeActivity) getActivity()).setupActionBar(((Topic) topic)
+					.getName());
+			break;
+		case ICollection.TYPE_LIST:
+			((HomeActivity) getActivity()).setupActionBar(((List) list)
+					.getName());
+			break;
+		case ICollection.TYPE_EVERYDAY_IDIOM:
+			((HomeActivity) getActivity()).setupActionBar("Everyday Idioms");
+			break;
 		}
 	}
 
@@ -354,31 +380,34 @@ public class RandomIdiomFragment extends BaseFragment implements
 	/* search a idiom */
 	private void searchIdiom(String keyword) {
 		// String keyword = searchBar.getText().toString();
-		Idiom idiom = dbh.searchIdiomByKeyword(keyword);
-
-		if (idiom.getName().isEmpty()) {
-			((BaseActivity) getActivity()).makeToast(keyword + " not found");
-		}else{
+//		Idiom idiom = dbh.searchIdiomByKeyword(keyword);
+//
+//		if (idiom.getName().isEmpty()) {
+//			((BaseActivity) getActivity()).makeToast(keyword + " not found");
+//		} else {
+//			int currentPosition = idiomPager.getCurrentItem();
+//			listIdiom.remove(currentPosition);
+//			listIdiom.add(currentPosition, idiom);
+//			currentIdiom = idiom;
+//			IdiomFragment fragment = pagerAdapter.getFragment(idiomPager
+//					.getCurrentItem());
+//			fragment.showView(idiom);
+//			checkCurrentIdiomInLiked();
+//			checkCurrentIdiomHasNote();
 //			
-//			tvIdiom.setText(idiom.getName());
-//			tvDefinition.setText(idiom.getDefinition());
-//			viewSearch.setVisibility(View.VISIBLE);
-//			idiomPager.setVisibility(View.GONE);
-			//listIdiom.add(idiomPager.getCurrentItem(), idiom);
-			int currentPosition = idiomPager.getCurrentItem();
-			listIdiom.remove(currentPosition);
-			listIdiom.add(currentPosition, idiom);
-			currentIdiom = idiom;
-			IdiomFragment fragment = pagerAdapter.getFragment(idiomPager.getCurrentItem());
-			fragment.showView(idiom);
-			checkCurrentIdiomInLiked();
-			checkCurrentIdiomHasNote();
-		}
+//		}
+		((HomeActivity)getActivity()).setDictionaryFragment(new DictionaryFragment());
+		Bundle bundle = new Bundle();
+		bundle.putString("keyword", keyword);
+		((HomeActivity)getActivity()).switchContent(R.id.container, ((HomeActivity)getActivity()).getDictionaryFragment(), bundle);
+		((HomeActivity)getActivity()).currentState = HomeActivity.STATE_DICTIONARY;
+		((HomeActivity)getActivity()).setBackground();
 	}
 
 	/* show dialog prompt user to add a note to a idiom */
 	private void showDialogAddNote() {
 		final Dialog dialog = new Dialog(getActivity());
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		dialog.setContentView(R.layout.dialog_add_note);
 		final EditText etNote = (EditText) dialog.findViewById(R.id.note);
 		Button btAdd = (Button) dialog.findViewById(R.id.bt_add_note);
@@ -407,7 +436,8 @@ public class RandomIdiomFragment extends BaseFragment implements
 				dialog.dismiss();
 			}
 		});
-		dialog.setTitle("Add note to [" + getCurrenIdiom().getName() + "]");
+		TextView tvAddNoteTo = (TextView) dialog.findViewById(R.id.add_note_to);
+		tvAddNoteTo.setText("Add note to [" + getCurrenIdiom().getName() + "]");
 		dialog.setCancelable(true);
 		dialog.show();
 	}
@@ -483,12 +513,12 @@ public class RandomIdiomFragment extends BaseFragment implements
 								List list = ((BaseActivity) getActivity())
 										.getDBHelper().getNewCreatedList();
 								addIdiomToList(idiom, list);
-								
+
 								dialog.dismiss();
 							}
 						}
 						List listLike = dbh.getListById(1);
-						if(dbh.checkIdiomInList(getCurrenIdiom(), listLike)){
+						if (dbh.checkIdiomInList(getCurrenIdiom(), listLike)) {
 							btLike.setImageResource(R.drawable.liked);
 						}
 					}
@@ -572,12 +602,12 @@ public class RandomIdiomFragment extends BaseFragment implements
 
 	/* get idiom is showing in viewpager */
 	private Idiom getCurrenIdiom() {
-//		if (listIdiom.size() > idiomPager.getCurrentItem()) {
-//			Idiom idiom = listIdiom.get(idiomPager.getCurrentItem());
-//
-//			return idiom;
-//		}
-//		return null;
+		// if (listIdiom.size() > idiomPager.getCurrentItem()) {
+		// Idiom idiom = listIdiom.get(idiomPager.getCurrentItem());
+		//
+		// return idiom;
+		// }
+		// return null;
 		return currentIdiom;
 	}
 
@@ -650,16 +680,33 @@ public class RandomIdiomFragment extends BaseFragment implements
 	/* show note of a idiom */
 	private void showDialogShowNote() {
 		Idiom idiom = getCurrenIdiom();
-		new AlertDialog.Builder(getActivity())
-				.setMessage("Note: " + dbh.getNoteOfIdiom(idiom))
-				.setTitle(idiom.getName())
-				.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-
-					}
-				}).setCancelable(true).show();
+//		new AlertDialog.Builder(getActivity())
+//				.setMessage("Note: " + dbh.getNoteOfIdiom(idiom))
+//				.setTitle(idiom.getName())
+//				.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+//
+//					@Override
+//					public void onClick(DialogInterface dialog, int which) {
+//
+//					}
+//				}).setCancelable(true).show();
+		final Dialog dialog = new Dialog(getActivity());
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.setContentView(R.layout.dialog_note);
+		TextView tvIdiom = (TextView)dialog.findViewById(R.id.idiom);
+		tvIdiom.setText(idiom.getName());
+		TextView tvNote = (TextView)dialog.findViewById(R.id.note);
+		tvNote.setText("Note: " + dbh.getNoteOfIdiom(idiom));
+		Button btOK = (Button)dialog.findViewById(R.id.ok);
+		btOK.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+		dialog.setCancelable(true);
+		dialog.show();
 	}
 
 	/* share a idiom */
@@ -679,6 +726,10 @@ public class RandomIdiomFragment extends BaseFragment implements
 		}
 
 	}
+	
+//	public void scrollToPosition(int position){
+//		idiomPager.setCurrentItem(position);
+//	}
 
 	@Override
 	public void onPageScrollStateChanged(int arg0) {
@@ -693,7 +744,7 @@ public class RandomIdiomFragment extends BaseFragment implements
 	@Override
 	public void onPageSelected(int arg0) {
 		if (listIdiom.size() > idiomPager.getCurrentItem()) {
-			currentIdiom =  listIdiom.get(idiomPager.getCurrentItem());
+			currentIdiom = listIdiom.get(idiomPager.getCurrentItem());
 		}
 		checkCurrentIdiomInLiked();
 		checkCurrentIdiomHasNote();
@@ -702,7 +753,7 @@ public class RandomIdiomFragment extends BaseFragment implements
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-		String keyword = (String)parent.getItemAtPosition(position);
+		String keyword = (String) parent.getItemAtPosition(position);
 		if (!keyword.isEmpty()) {
 			((BaseActivity) getActivity()).makeToast(keyword);
 			searchIdiom(keyword);

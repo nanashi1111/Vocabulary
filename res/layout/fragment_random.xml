@@ -8,7 +8,7 @@
     android:weightSum="10" >
 
     <AutoCompleteTextView
-        android:id="@+id/search_idiom"
+        android:id="@+id/search_idiom_random"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10sp"
@@ -20,10 +20,10 @@
         android:inputType="text" />
 
     <ScrollView
-        android:fadeScrollbars="false"
-        android:scrollbarStyle="insideInset"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:fadeScrollbars="false"
+        android:scrollbarStyle="insideInset" >
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -108,15 +108,15 @@
                     android:layout_margin="10sp"
                     android:src="@drawable/share" />
             </LinearLayout>
+
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/adView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                ads:adSize="BANNER"
+                ads:adUnitId="@string/banner_ad_unit_id" />
         </LinearLayout>
     </ScrollView>
-
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id" />
 
 </LinearLayout>

@@ -2,11 +2,13 @@ package com.it.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -103,7 +105,7 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 		for (int i = 0; i < btChoices.length; i++) {
 			btChoices[i].setText(question.getChoices()[i]);
 			if (question.getWord().lastIndexOf(question.getChoices()[i]) > 0) {
-				String word = tvWord.getText().toString();
+				String word = tvWord.getText().toString().trim();
 				word = word.replace(question.getChoices()[i], "***");
 				tvWord.setText(word);
 
@@ -240,94 +242,173 @@ public class ExamFragment extends BaseFragment implements OnClickListener {
 
 	public void showDialogCancelExam(final int screenToGo,
 			final boolean randomScreenFocusSearchBar) {
-		new AlertDialog.Builder(getActivity())
-				.setMessage(
-						"You are doing a test, do you want to cancel the test?")
-				.setTitle("Exam")
-				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+		// new AlertDialog.Builder(getActivity())
+		// .setMessage(
+		// "You are doing a test, do you want to cancel the test?")
+		// .setTitle("Exam")
+		// .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		//
+		// @Override
+		// public void onClick(DialogInterface dialog, int which) {
+		//
+		// }
+		// })
+		// .setPositiveButton("Yes",
+		// new DialogInterface.OnClickListener() {
+		//
+		// @Override
+		// public void onClick(DialogInterface dialog,
+		// int which) {
+		// switch (screenToGo) {
+		//
+		// /* show random idiom screen */
+		// case HomeActivity.STATE_RANDOM:
+		// ((HomeActivity) getActivity())
+		// .setRandomFragment(new RandomIdiomFragment(
+		// randomScreenFocusSearchBar));
+		// Bundle bundle = new Bundle();
+		// bundle.putInt("from_list_fragment",
+		// ICollection.TYPE_TOPIC);
+		// bundle.putBoolean("random_load", true);
+		// // randomFragment.setArguments(bundle);
+		// ((HomeActivity) getActivity())
+		// .switchContent(
+		// R.id.container,
+		// ((HomeActivity) getActivity())
+		// .getRandomFragment(),
+		// bundle);
+		// HomeActivity.currentState = HomeActivity.STATE_RANDOM;
+		// ((HomeActivity) getActivity())
+		// .setBackground();
+		// break;
+		//
+		// /* show list screen */
+		// case HomeActivity.STATE_LISTS:
+		// ((HomeActivity) getActivity())
+		// .setListFragment(ListFragments
+		// .getInstance());
+		// // take collection info to show
+		// // in listFragment
+		// int collectionType = ((HomeActivity) getActivity())
+		// .getRandomFragment()
+		// .getCurrentCollectionType();
+		// Bundle bundleList = new Bundle();
+		// bundleList.putInt("collection_type",
+		// collectionType);
+		// if (collectionType == ICollection.TYPE_TOPIC) {
+		// bundleList.putInt("collection_id",
+		// ((HomeActivity) getActivity())
+		// .getRandomFragment()
+		// .getCurrentTopicID());
+		// } else {
+		// bundleList.putInt("collection_id",
+		// ((HomeActivity) getActivity())
+		// .getRandomFragment()
+		// .getCurrentListID());
+		// }
+		// ((HomeActivity) getActivity())
+		// .switchContent(
+		// R.id.container,
+		// ((HomeActivity) getActivity())
+		// .getListFragment(),
+		// bundleList);
+		//
+		// HomeActivity.currentState = HomeActivity.STATE_LISTS;
+		// ((HomeActivity) getActivity())
+		// .setBackground();
+		// break;
+		// }
+		// }
+		// }).setCancelable(true).show();
+		final Dialog dialog = new Dialog(getActivity());
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.setContentView(R.layout.dialog_cancel_exam);
+		Button btYes = (Button) dialog.findViewById(R.id.yes);
+		btYes.setOnClickListener(new View.OnClickListener() {
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
+			@Override
+			public void onClick(View v) {
+				switch (screenToGo) {
+				/* show random idiom screen */
+				case HomeActivity.STATE_RANDOM:
+					((HomeActivity) getActivity())
+							.setRandomFragment(new RandomIdiomFragment(
+									randomScreenFocusSearchBar));
+					Bundle bundle = new Bundle();
+					bundle.putInt("from_list_fragment", ICollection.TYPE_TOPIC);
+					bundle.putBoolean("random_load", true);
+					// randomFragment.setArguments(bundle);
+					((HomeActivity) getActivity()).switchContent(
+							R.id.container,
+							((HomeActivity) getActivity()).getRandomFragment(),
+							bundle);
+					HomeActivity.currentState = HomeActivity.STATE_RANDOM;
+					((HomeActivity) getActivity()).setBackground();
+					break;
 
+				/* show list screen */
+				case HomeActivity.STATE_LISTS:
+					((HomeActivity) getActivity())
+							.setListFragment(ListFragments.getInstance());
+					// take collection info to show
+					// in listFragment
+					int collectionType = ((HomeActivity) getActivity())
+							.getRandomFragment().getCurrentCollectionType();
+					Bundle bundleList = new Bundle();
+					bundleList.putInt("collection_type", collectionType);
+					if (collectionType == ICollection.TYPE_TOPIC) {
+						bundleList.putInt("collection_id",
+								((HomeActivity) getActivity())
+										.getRandomFragment()
+										.getCurrentTopicID());
+					} else {
+						bundleList
+								.putInt("collection_id",
+										((HomeActivity) getActivity())
+												.getRandomFragment()
+												.getCurrentListID());
 					}
-				})
-				.setPositiveButton("Yes",
-						new DialogInterface.OnClickListener() {
+					((HomeActivity) getActivity()).switchContent(
+							R.id.container,
+							((HomeActivity) getActivity()).getListFragment(),
+							bundleList);
 
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								switch (screenToGo) {
+					HomeActivity.currentState = HomeActivity.STATE_LISTS;
+					((HomeActivity) getActivity()).setBackground();
+					break;
+				case HomeActivity.STATE_DICTIONARY:
+					((HomeActivity) getActivity())
+							.setDictionaryFragment(new DictionaryFragment());
+					((HomeActivity) getActivity()).switchContent(
+							R.id.container, ((HomeActivity) getActivity())
+									.getDictionaryFragment());
+					HomeActivity.currentState = HomeActivity.STATE_DICTIONARY;
+					((HomeActivity) getActivity()).setBackground();
+					break;
+				}
+				dialog.dismiss();
+			}
+		});
+		Button btNo = (Button) dialog.findViewById(R.id.no);
+		btNo.setOnClickListener(new View.OnClickListener() {
 
-								/* show random idiom screen */
-								case HomeActivity.STATE_RANDOM:
-									((HomeActivity) getActivity())
-											.setRandomFragment(new RandomIdiomFragment(
-													randomScreenFocusSearchBar));
-									Bundle bundle = new Bundle();
-									bundle.putInt("from_list_fragment",
-											ICollection.TYPE_TOPIC);
-									bundle.putBoolean("random_load", true);
-									// randomFragment.setArguments(bundle);
-									((HomeActivity) getActivity())
-											.switchContent(
-													R.id.container,
-													((HomeActivity) getActivity())
-															.getRandomFragment(),
-													bundle);
-									HomeActivity.currentState = HomeActivity.STATE_RANDOM;
-									((HomeActivity) getActivity())
-											.setBackground();
-									break;
-
-								/* show list screen */
-								case HomeActivity.STATE_LISTS:
-									((HomeActivity) getActivity())
-											.setListFragment(ListFragments
-													.getInstance());
-									// take collection info to show
-									// in listFragment
-									int collectionType = ((HomeActivity) getActivity())
-											.getRandomFragment()
-											.getCurrentCollectionType();
-									Bundle bundleList = new Bundle();
-									bundleList.putInt("collection_type",
-											collectionType);
-									if (collectionType == ICollection.TYPE_TOPIC) {
-										bundleList.putInt("collection_id",
-												((HomeActivity) getActivity())
-														.getRandomFragment()
-														.getCurrentTopicID());
-									} else {
-										bundleList.putInt("collection_id",
-												((HomeActivity) getActivity())
-														.getRandomFragment()
-														.getCurrentListID());
-									}
-									((HomeActivity) getActivity())
-											.switchContent(
-													R.id.container,
-													((HomeActivity) getActivity())
-															.getListFragment(),
-													bundleList);
-
-									HomeActivity.currentState = HomeActivity.STATE_LISTS;
-									((HomeActivity) getActivity())
-											.setBackground();
-									break;
-								}
-							}
-						}).setCancelable(true).show();
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+		dialog.setCancelable(true);
+		dialog.show();
 	}
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.next:
-			//check answerd
-			if(!exam.getCurrentQuestion().isAnswered()){
+			// check answerd
+			if (!exam.getCurrentQuestion().isAnswered()) {
 				((BaseActivity) getActivity())
-				.makeToast("You must answer this question first");
+						.makeToast("You must answer this question first");
 				return;
 			}
 			// check can next

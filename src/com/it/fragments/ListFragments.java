@@ -23,7 +23,9 @@ import com.it.database.DBHelper;
 import com.it.models.ICollection;
 import com.it.models.Idiom;
 import com.it.models.List;
+import com.it.models.Topic;
 import com.it.vocabulary.BaseActivity;
+import com.it.vocabulary.HomeActivity;
 import com.it.vocabulary.R;
 
 public class ListFragments extends BaseFragment implements OnItemClickListener {
@@ -86,8 +88,9 @@ public class ListFragments extends BaseFragment implements OnItemClickListener {
 			listIdiom = ((BaseActivity) getActivity()).getDBHelper()
 					.getListIdiomOfList(listId);
 		}
-		if(collectionType == ICollection.TYPE_EVERYDAY_IDIOM){
-			listIdiom = ((BaseActivity) getActivity()).getDBHelper().getListIdiomOfEveryDayIdiom();
+		if (collectionType == ICollection.TYPE_EVERYDAY_IDIOM) {
+			listIdiom = ((BaseActivity) getActivity()).getDBHelper()
+					.getListIdiomOfEveryDayIdiom();
 		}
 	}
 
@@ -213,9 +216,48 @@ public class ListFragments extends BaseFragment implements OnItemClickListener {
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-		Idiom idiom = listIdiom.get(position);
-		showDialogDefinition(idiom);
-
+		// Idiom idiom = listIdiom.get(position);
+		// showDialogDefinition(idiom);
+		// ((HomeActivity)getActivity()).switchContent(R.id.container,
+		// ((HomeActivity)getActivity()).getRandomFragment());
+		// ((HomeActivity)getActivity()).currentState =
+		// HomeActivity.STATE_RANDOM;
+		// ((HomeActivity)getActivity()).setBackground();
+		Bundle b = getArguments();
+		int collectionType = b.getInt("collection_type");
+		Bundle bundle = new Bundle();
+		if (collectionType == ICollection.TYPE_TOPIC) {
+			int topicId = b.getInt("collection_id");
+			((HomeActivity)getActivity()).setRandomFragment(new RandomIdiomFragment());
+			
+			bundle.putInt("from_list_fragment",
+					ICollection.TYPE_TOPIC);
+			bundle.putBoolean("random_load", false);
+			bundle.putInt("topic_id", topicId);
+			bundle.putInt("position", position);
+			// randomFragment.setArguments(bundle);
+			
+		}
+		if (collectionType == ICollection.TYPE_LIST) {
+			int listId = b.getInt("collection_id");
+			((HomeActivity)getActivity()).setRandomFragment(new RandomIdiomFragment());
+			
+			bundle.putInt("from_list_fragment",
+					ICollection.TYPE_LIST);
+			bundle.putInt("list_id", listId);
+			bundle.putInt("position", position);
+			
+		}
+		if (collectionType == ICollection.TYPE_EVERYDAY_IDIOM) {
+			((HomeActivity)getActivity()).setRandomFragment(new RandomIdiomFragment());
+			
+			bundle.putInt("from_list_fragment", ICollection.TYPE_EVERYDAY_IDIOM);
+			bundle.putInt("position", position);
+			
+		}
+		((HomeActivity)getActivity()).switchContent(R.id.container, ((HomeActivity)getActivity()).getRandomFragment(), bundle);
+		((HomeActivity)getActivity()).currentState = HomeActivity.STATE_RANDOM;
+		((HomeActivity)getActivity()).setBackground();
 	}
 
 }

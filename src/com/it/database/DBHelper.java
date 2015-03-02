@@ -168,11 +168,10 @@ public class DBHelper extends SQLiteOpenHelper {
 		ArrayList<Idiom> listIdiom = new ArrayList<Idiom>();
 		String query;
 		if (!filterAlreadyKnow) {
-			query = "select * from Idiom where topic_id = " + topicId
-					+ " order by random()";
+			query = "select * from Idiom where topic_id = " + topicId;
 		} else {
 			query = "select * from Idiom where topic_id = " + topicId
-					+ " and list_id <> 2" + " order by random()";
+					+ " and list_id <> 2";
 		}
 		Cursor cursor = getReadableDatabase().rawQuery(query, null);
 		if (cursor.getCount() > 0) {
@@ -243,8 +242,12 @@ public class DBHelper extends SQLiteOpenHelper {
 	}
 
 	public Idiom searchIdiomByKeyword(String keyword) {
-		String query = "select * from Idiom where name = \'" + keyword + "\'";
-		Cursor cursor = getReadableDatabase().rawQuery(query, null);
+		Cursor cursor = getReadableDatabase().query(
+				"Idiom",
+				new String[] { "id", "name", "definition", "sample", "note",
+						"date_create", "topic_id" }, "name = ?",
+				new String[] { keyword }, null, null, null);
+		// Cursor cursor = getReadableDatabase().rawQuery(query, null);
 		Idiom idiom = new Idiom();
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -259,6 +262,34 @@ public class DBHelper extends SQLiteOpenHelper {
 			idiom.setTopicId(cursor.getInt(cursor.getColumnIndex("topic_id")));
 		}
 		return idiom;
+	}
+
+	public ArrayList<Idiom> searchListIdiom(String keyword) {
+		ArrayList<Idiom> list = new ArrayList<Idiom>();
+		Cursor cursor = getReadableDatabase().query(
+				"Idiom",
+				new String[] { "id", "name", "definition", "sample", "note",
+						"date_create", "topic_id" }, "name like ?",
+				new String[] { "%" + keyword + "%" }, null, null, null);
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			do {
+				Idiom idiom = new Idiom();
+				idiom.setId(cursor.getInt(cursor.getColumnIndex("id")));
+				idiom.setName(cursor.getString(cursor.getColumnIndex("name")));
+				idiom.setDefinition(cursor.getString(cursor
+						.getColumnIndex("definition")));
+				idiom.setSample(cursor.getString(cursor
+						.getColumnIndex("sample")));
+				idiom.setNote(cursor.getString(cursor.getColumnIndex("note")));
+				idiom.setDateCreate(cursor.getString(cursor
+						.getColumnIndex("date_create")));
+				idiom.setTopicId(cursor.getInt(cursor
+						.getColumnIndex("topic_id")));
+				list.add(idiom);
+			} while (cursor.moveToNext());
+		}
+		return list;
 	}
 
 	public void addIdiomNote(String note, Idiom idiom) {
@@ -441,9 +472,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	public ArrayList<Idiom> getListIdiomOfList(List list) {
 		ArrayList<Idiom> listIdiom = new ArrayList<Idiom>();
-		String query = "select Idiom.id, name, definition, sample, note, date_create, topic_id, Idiom.list_id from Idiom, ListDetail where Idiom.id = ListDetail.idiom_id and ListDetail.list_id = "+list.getListId();
-//		String query = "select * from Idiom where list_id = "
-//				+ list.getListId();
+		String query = "select Idiom.id, name, definition, sample, note, date_create, topic_id, Idiom.list_id from Idiom, ListDetail where Idiom.id = ListDetail.idiom_id and ListDetail.list_id = "
+				+ list.getListId();
+		// String query = "select * from Idiom where list_id = "
+		// + list.getListId();
 		Cursor cursor = getReadableDatabase().rawQuery(query, null);
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -469,8 +501,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	public ArrayList<Idiom> getListIdiomOfList(int listId) {
 		ArrayList<Idiom> listIdiom = new ArrayList<Idiom>();
-		String query = "select Idiom.id, name, definition, sample, note, date_create, topic_id, Idiom.list_id from Idiom, ListDetail where Idiom.id = ListDetail.idiom_id and ListDetail.list_id = "+listId;
-//		String query = "select * from Idiom where list_id = " + listId;
+		String query = "select Idiom.id, name, definition, sample, note, date_create, topic_id, Idiom.list_id from Idiom, ListDetail where Idiom.id = ListDetail.idiom_id and ListDetail.list_id = "
+				+ listId;
+		// String query = "select * from Idiom where list_id = " + listId;
 		Cursor cursor = getReadableDatabase().rawQuery(query, null);
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();

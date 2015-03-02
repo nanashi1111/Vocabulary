@@ -7,6 +7,7 @@
     tools:context="com.it.vocabulary.HomeActivity" >
 
     <RelativeLayout
+        android:id="@+id/root_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical" >
@@ -21,7 +22,7 @@
                 android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                
+                android:background="@color/color_random_idiom_screen_main_bg"
                 android:orientation="vertical" >
             </LinearLayout>
 
