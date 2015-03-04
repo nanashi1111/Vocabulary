@@ -29,6 +29,8 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="sample">Example</string>
+    <string name="empty_data">Data empty</string>
+    <string name="download_data">Your data is empty, do you want to download data from server?</string>
     <string name="confirm_cancel">You are doing a test, do you want to cancel the test?</string>
     <string name="banner_ad_unit_id">ca-app-pub-2928455978605682/5725531453</string>
     <string name="banner_full">ca-app-pub-2928455978605682/8678997854</string>

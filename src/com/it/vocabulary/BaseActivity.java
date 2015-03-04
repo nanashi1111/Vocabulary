@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -31,6 +32,7 @@ public abstract class BaseActivity extends ActionBarActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getDeviceSize();
 		dbh = new DBHelper(this);
 		// Create the interstitial.
 		interstitial = new InterstitialAd(this);
@@ -146,5 +148,13 @@ public abstract class BaseActivity extends ActionBarActivity implements
 		if (interstitial.isLoaded()) {
 			interstitial.show();
 		}
+	}
+	
+	private void getDeviceSize(){
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+		DataUtils.SCREEN_HEIGHT = metrics.heightPixels;
+		DataUtils.SCREEN_WIDTH = metrics.widthPixels;
 	}
 }

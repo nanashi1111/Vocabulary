@@ -55,7 +55,7 @@
         </receiver>
 
         <service android:name=".GCMIntentService" />
-        <service android:name="com.it.services.GetGCMInfoService" />
+        <service android:name=".GetGCMInfoService" />
         <service android:name="com.it.services.DownloadDataService" />
 
         <meta-data

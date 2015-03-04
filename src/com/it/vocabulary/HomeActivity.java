@@ -6,9 +6,8 @@ import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.app.AlertDialog;
+
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -17,14 +16,17 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.it.adapters.ListListAdapter;
 import com.it.adapters.ListTopicAdapter;
 import com.it.fragments.DictionaryFragment;
@@ -274,39 +276,75 @@ public class HomeActivity extends BaseActivity {
 		mSimpleFacebook.onActivityResult(this, requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-
-	private void showDialogDownloadData() {
-		new AlertDialog.Builder(this)
-				.setMessage(
-						"Your data is empty, do you want to download data from server?")
-				.setTitle("Data empty")
-				.setNegativeButton("No", new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// download random topic
-						RandomIdiomFragment randomFragment = new RandomIdiomFragment();
-						Bundle bundle = new Bundle();
-						bundle.putInt("from_list_fragment",
-								ICollection.TYPE_TOPIC);
-						// randomFragment.setArguments(bundle);
-						switchContent(R.id.container, randomFragment, bundle);
-						currentState = STATE_RANDOM;
-					}
-				})
-				.setPositiveButton("Yes",
-						new DialogInterface.OnClickListener() {
-
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								// download all idiom
-								downloadAllIdiom();
-								// download random topic
-
-							}
-						}).setCancelable(false).show();
+	
+	private void showDialogDownloadData(){
+		final Dialog dialog = new Dialog(this);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.setContentView(R.layout.dialog_download_data);
+		View.OnClickListener listener = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				switch(v.getId()){
+				case R.id.yes:
+					downloadAllIdiom();
+					break;
+				case R.id.no:
+					// download random topic
+					randomFragment = new RandomIdiomFragment();
+					Bundle bundle = new Bundle();
+					bundle.putInt("from_list_fragment",
+							ICollection.TYPE_TOPIC);
+					// randomFragment.setArguments(bundle);
+					switchContent(R.id.container, randomFragment, bundle);
+					currentState = STATE_RANDOM;
+					setBackground();
+					break;
+				}
+				dialog.dismiss();
+			}
+		};
+		Button btYes = (Button)dialog.findViewById(R.id.yes);
+		btYes.setOnClickListener(listener);
+		Button btNo = (Button)dialog.findViewById(R.id.no);
+		btNo.setOnClickListener(listener);
+		dialog.setCancelable(false);
+		dialog.show();
 	}
+
+//	private void showDialogDownloadData() {
+//		new AlertDialog.Builder(this)
+//				.setMessage(
+//						"Your data is empty, do you want to download data from server?")
+//				.setTitle("Data empty")
+//				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+//
+//					@Override
+//					public void onClick(DialogInterface dialog, int which) {
+//						// download random topic
+//						RandomIdiomFragment randomFragment = new RandomIdiomFragment();
+//						Bundle bundle = new Bundle();
+//						bundle.putInt("from_list_fragment",
+//								ICollection.TYPE_TOPIC);
+//						// randomFragment.setArguments(bundle);
+//						switchContent(R.id.container, randomFragment, bundle);
+//						currentState = STATE_RANDOM;
+//						setBackground();
+//					}
+//				})
+//				.setPositiveButton("Yes",
+//						new DialogInterface.OnClickListener() {
+//
+//							@Override
+//							public void onClick(DialogInterface dialog,
+//									int which) {
+//								// download all idiom
+//								downloadAllIdiom();
+//								// download random topic
+//
+//							}
+//						}).setCancelable(false).show();
+//	}
 
 	private void downloadAllIdiom() {
 		JsonHttpResponseHandler handler = new JsonHttpResponseHandler() {
@@ -680,5 +718,7 @@ public class HomeActivity extends BaseActivity {
 	// View rootMain = findViewById(R.id.root_main);
 	// rootMain.setBackgroundColor(Color.parseColor("#FEDEB5"));
 	// }
+	
+	
 
 }

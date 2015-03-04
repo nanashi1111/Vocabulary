@@ -48,6 +48,7 @@ import com.it.models.Idiom;
 import com.it.models.List;
 import com.it.models.Topic;
 import com.it.utils.ConnectionUtils;
+import com.it.utils.DataUtils;
 import com.it.utils.FacebookUtils;
 import com.it.utils.LogUtils;
 import com.it.utils.PreferenceUtils;
@@ -408,6 +409,7 @@ public class RandomIdiomFragment extends BaseFragment implements
 	private void showDialogAddNote() {
 		final Dialog dialog = new Dialog(getActivity());
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		//dialog.getWindow().setLayout((int)(DataUtils.SCREEN_WIDTH*0.8f), (int)(DataUtils.SCREEN_HEIGHT*0.5f));
 		dialog.setContentView(R.layout.dialog_add_note);
 		final EditText etNote = (EditText) dialog.findViewById(R.id.note);
 		Button btAdd = (Button) dialog.findViewById(R.id.bt_add_note);

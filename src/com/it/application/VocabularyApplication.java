@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.Intent;
 
 import com.it.database.DBHelper;
-import com.it.services.GetGCMInfoService;
+import com.it.vocabulary.GetGCMInfoService;
 import com.it.utils.Constant;
 import com.sromku.simple.fb.Permission;
 import com.sromku.simple.fb.SimpleFacebook;
