@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -27,6 +28,7 @@ public abstract class BaseActivity extends ActionBarActivity implements
 	private android.support.v4.app.FragmentManager mFragmentManager;
 	protected DBHelper dbh;
 	protected ProgressBar loadingBar;
+	protected TextView tvPercent;
 	protected InterstitialAd interstitial;
 
 	@Override
@@ -50,8 +52,16 @@ public abstract class BaseActivity extends ActionBarActivity implements
 		if (loadingBar == null) {
 			loadingBar = (ProgressBar) findViewById(R.id.loading_bar);
 		}
+		if(tvPercent == null){
+			tvPercent = (TextView)findViewById(R.id.percent);
+		}
 		loadingBar.setVisibility(View.VISIBLE);
-
+		tvPercent.setVisibility(View.VISIBLE);
+		
+	}
+	
+	public void setProgressText(String percent){
+		tvPercent.setText(percent);
 	}
 
 	public void hideProgressDialog() {
@@ -61,6 +71,9 @@ public abstract class BaseActivity extends ActionBarActivity implements
 		// }
 		if (loadingBar != null && loadingBar.getVisibility() == View.VISIBLE) {
 			loadingBar.setVisibility(View.INVISIBLE);
+		}
+		if(tvPercent != null){
+			tvPercent.setVisibility(View.INVISIBLE);
 		}
 	}
 

@@ -7,5 +7,6 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry exported="true" kind="lib" path="G:/Library/JAR/android-async-http-1.4.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/HP PRO/Downloads/gcm.jar"/>
+	<classpathentry exported="true" kind="lib" path="G:/Library/JAR/crouton-1.8.1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

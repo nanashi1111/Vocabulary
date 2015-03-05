@@ -300,10 +300,6 @@ public class RandomIdiomFragment extends BaseFragment implements
 				((BaseActivity) getActivity()).hideProgressDialog();
 				topic = CollectionGenerator.getCollection(
 						ICollection.TYPE_TOPIC, topicId, dbh);
-				Topic t = (Topic) topic;
-				((BaseActivity) getActivity()).makeToast("Topic = "
-						+ t.getName() + " - Word count = "
-						+ t.getListIdiom().size());
 				showView(topic);
 			}
 		};
